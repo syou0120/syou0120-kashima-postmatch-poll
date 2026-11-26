@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>鹿島アントラーズ 試合後アンケート作成ツール</title>
+<title>鹿島アントラーズ アンケート作成ツール（試合前・試合後）</title>
 <style>
   :root {
     --bg: #0b1120;
@@ -15,6 +15,7 @@
     --gold: #fbbf24;
     --gold-btn: #f59e0b;
     --green: #059669;
+    --blue: #2563eb;
     --text: #f8fafc;
     --muted: #94a3b8;
   }
@@ -44,7 +45,7 @@
     justify-content: space-between;
     gap: 8px;
   }
-  h1 { margin: 0; font-size: 16px; font-weight: 900; color: #fff; }
+  h1 { margin: 0; font-size: 15px; font-weight: 900; color: #fff; }
   .sub { margin: 0; font-size: 11px; color: #fde68a; }
   main {
     max-width: 640px;
@@ -76,6 +77,7 @@
   .bar-red { background: #dc2626; }
   .bar-gold { background: var(--gold); }
   .bar-green { background: #10b981; }
+  .bar-blue { background: #3b82f6; }
   label { display: block; font-size: 11px; font-weight: 700; color: var(--muted); margin-bottom: 4px; }
   input[type="text"], input[type="number"], select, textarea {
     width: 100%;
@@ -106,6 +108,7 @@
   button.active-red { background: #b91c1c; color: #fff; border-color: var(--gold); }
   button.active-gold { background: var(--gold-btn); color: #090d16; border-color: #fde68a; }
   button.active-green { background: var(--green); color: #fff; border-color: #6ee7b7; }
+  button.active-blue { background: var(--blue); color: #fff; border-color: #93c5fd; }
   .btn-reset { background: rgba(0,0,0,0.6); color: #fff; border-color: rgba(255,255,255,0.25); padding: 6px 10px; font-size: 11px; }
   .btn-gold { background: var(--gold-btn); color: #090d16; border: none; font-weight: 900; }
   .btn-yt {
@@ -119,6 +122,21 @@
     padding: 12px;
     border-radius: 12px;
     border: 1px solid rgba(251, 191, 36, 0.45);
+  }
+  .mode-switch {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    background: #030712;
+    padding: 6px;
+    border-radius: 14px;
+    border: 1px solid #1e293b;
+  }
+  .mode-switch button {
+    padding: 10px;
+    font-size: 13px;
+    font-weight: 900;
+    border: none;
   }
   .row-wrap { display: flex; flex-wrap: wrap; gap: 6px; }
   .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
@@ -159,7 +177,7 @@
     padding: 12px;
     font-family: inherit;
     font-size: 13px;
-    line-height: 1.55;
+    line-height: 1.6;
     color: #fff;
   }
   .copy-opt-btn {
@@ -172,6 +190,7 @@
     text-align: left;
   }
   .badge-red { background: #991b1b; color: #fff; font-size: 10px; padding: 2px 6px; border-radius: 6px; flex-shrink: 0; }
+  .hidden { display: none !important; }
   .modal-bg {
     position: fixed;
     inset: 0;
@@ -244,17 +263,23 @@
 <header>
   <div class="header-inner">
     <div>
-      <h1>試合後アンケート作成ツール</h1>
-      <p class="sub">鹿syouチャンネル用 · スマホ即投稿ジェネレーター</p>
+      <h1>鹿島アンケート作成ツール</h1>
+      <p class="sub">鹿syouチャンネル用 · 試合前MOM予想＆試合後アンケート</p>
     </div>
     <button type="button" class="btn-reset" data-action="reset">リセット</button>
   </div>
 </header>
 
 <main>
-  <!-- ① 試合情報 -->
+  <!-- モード切替 -->
+  <div class="mode-switch">
+    <button type="button" data-action="mode" data-val="pre">🔥 試合前MOM予想</button>
+    <button type="button" data-action="mode" data-val="post">⚽ 試合後アンケート</button>
+  </div>
+
+  <!-- ① 共通試合情報 -->
   <section>
-    <h2><span class="bar bar-red"></span>① 試合情報（タイトルに自動反映）</h2>
+    <h2><span class="bar bar-red"></span>① 試合基本情報</h2>
 
     <div>
       <label>大会名</label>
@@ -271,7 +296,7 @@
       <div>
         <label>試合名（第〇節など）</label>
         <div class="flex-row">
-          <input id="round-input" type="text" value="第1節" placeholder="例: 第15節">
+          <input id="round-input" type="text" value="第15節" placeholder="例: 第15節">
           <button type="button" data-action="step-round" style="flex-shrink:0; color:#fcd34d;">+1</button>
         </div>
       </div>
@@ -311,9 +336,66 @@
           <option value="サンフレッチェ広島">サンフレッチェ広島</option>
           <option value="アビスパ福岡">アビスパ福岡</option>
         </select>
-        <input id="opponent-input" type="text" value="浦和レッズ" placeholder="対戦相手名">
+        <input id="opponent-input" type="text" value="清水エスパルス" placeholder="対戦相手名">
       </div>
     </div>
+  </section>
+
+  <!-- ②-A 試合前MOM予想用設定 -->
+  <section id="pre-section">
+    <h2><span class="bar bar-blue"></span>② 試合前MOM予想の設定</h2>
+
+    <div>
+      <label>見出しキャッチフレーズ</label>
+      <div class="row-wrap" style="margin-bottom:6px;">
+        <button type="button" data-action="catch" data-val="【金J決戦！】">【金J決戦！】</button>
+        <button type="button" data-action="catch" data-val="【ホーム決戦！】">【ホーム決戦！】</button>
+        <button type="button" data-action="catch" data-val="【アウェイ決戦！】">【アウェイ決戦！】</button>
+        <button type="button" data-action="catch" data-val="【負けられない一戦！】">【負けられない一戦！】</button>
+        <button type="button" data-action="catch" data-val="【首位攻防戦！】">【首位攻防戦！】</button>
+      </div>
+      <input id="pre-catch-input" type="text" value="【金J決戦！】" placeholder="キャッチフレーズ">
+    </div>
+
+    <div class="grid-2">
+      <div>
+        <label>タイミング表記</label>
+        <div class="grid-3">
+          <button type="button" data-action="timing" data-val="明日">明日</button>
+          <button type="button" data-action="timing" data-val="本日">本日</button>
+          <button type="button" data-action="timing" data-val="今週末">今週末</button>
+        </div>
+      </div>
+      <div>
+        <label>日時（例: 11/20（金）19:00）</label>
+        <input id="pre-datetime-input" type="text" value="11/20（金）19:00" placeholder="例: 11/20（金）19:00">
+      </div>
+    </div>
+
+    <div>
+      <label>スタジアム・会場</label>
+      <div class="row-wrap" style="margin-bottom:6px;">
+        <button type="button" data-action="stadium" data-val="メルカリスタジアム">メルカリスタジアム</button>
+        <button type="button" data-action="stadium" data-val="国立競技場">国立競技場</button>
+        <button type="button" data-action="stadium" data-val="敵地・アウェイ">敵地・アウェイ</button>
+      </div>
+      <input id="pre-stadium-input" type="text" value="メルカリスタジアム" placeholder="スタジアム名">
+    </div>
+
+    <div>
+      <label>意気込み・見どころメッセージ（2行目）</label>
+      <textarea id="pre-hype-input" rows="2">ルヴァンカップ準決勝進出の勢いそのままに、金曜ナイターのホームゲームで確実に勝ち点3を掴み取りましょう！</textarea>
+    </div>
+
+    <div>
+      <label>チャンネル登録呼びかけ文（自動挿入・編集可）</label>
+      <textarea id="pre-sub-input" rows="2">スタジアムの熱い応援や現地ならではのリアルな雰囲気も随時発信中！まだの方はぜひチャンネル登録をして、一緒にアントラーズを後押ししましょう！🦌✨</textarea>
+    </div>
+  </section>
+
+  <!-- ②-B 試合後アンケート用設定 -->
+  <section id="post-section" class="hidden">
+    <h2><span class="bar bar-gold"></span>② 試合結果・アンケート種類（試合後）</h2>
 
     <div>
       <label>試合結果（左: 鹿島 ／ 右: 相手）</label>
@@ -332,11 +414,6 @@
         </div>
       </div>
     </div>
-  </section>
-
-  <!-- ② アンケート種類・本文 -->
-  <section>
-    <h2><span class="bar bar-gold"></span>② アンケート種類・本文</h2>
 
     <div class="grid-4">
       <button type="button" data-action="poll-type" data-val="mom">今日のMOM</button>
@@ -368,9 +445,9 @@
     <div>
       <label>ワンタップ追加</label>
       <div class="row-wrap">
-        <button type="button" data-action="quick-opt" data-val="チーム全員がMOM！" style="color:#fde68a;">+ チーム全員がMOM！</button>
+        <button type="button" data-action="quick-opt" data-val="その他（コメント欄で予想！）" style="color:#fde68a;">+ その他（コメント欄で予想！）</button>
+        <button type="button" data-action="quick-opt" data-val="チーム全員がMOM！">+ チーム全員がMOM！</button>
         <button type="button" data-action="quick-opt" data-val="その他（コメント欄へ！）">+ その他（コメント欄へ！）</button>
-        <button type="button" data-action="quick-opt" data-val="現地・DAZN応援のサポーター">+ サポーター</button>
       </div>
     </div>
   </section>
@@ -432,8 +509,9 @@
 
 <script>
 (function () {
-  var STORAGE_KEY = 'kashima_postmatch_poll_v2';
-  var DEFAULT_OUTRO = '📢 次の試合もアンケート投稿やるよ！ぜひチャンネル登録して待っていてね🔥';
+  var STORAGE_KEY = 'kashima_poll_tool_v3';
+  var DEFAULT_POST_OUTRO = '📢 次の試合もアンケート投稿やるよ！ぜひチャンネル登録して待っていてね🔥';
+  var DEFAULT_PRE_SUB = 'スタジアムの熱い応援や現地ならではのリアルな雰囲気も随時発信中！まだの方はぜひチャンネル登録をして、一緒にアントラーズを後押ししましょう！🦌✨';
 
   var PLAYERS = [
     { number: 1, name: '早川友基', pos: 'GK' },
@@ -495,25 +573,32 @@
     }
   };
 
+  var DEFAULT_PRE_OPTIONS = ['#40 鈴木優磨', '#9 レオ・セアラ', '#18 ヤン・マテウス', '#10 柴崎岳', 'その他（コメント欄で予想！）'];
+
   var state = {
+    mode: 'pre',
     comp: '明治安田J1リーグ',
-    round: '第1節',
+    round: '第15節',
     ha: 'HOME',
-    opponent: '浦和レッズ',
+    opponent: '清水エスパルス',
+    preCatch: '【金J決戦！】',
+    preTiming: '明日',
+    preDatetime: '11/20（金）19:00',
+    preStadium: 'メルカリスタジアム',
+    preHype: 'ルヴァンカップ準決勝進出の勢いそのままに、金曜ナイターのホームゲームで確実に勝ち点3を掴み取りましょう！',
+    preSub: DEFAULT_PRE_SUB,
     scoreKashima: '2',
     scoreOpponent: '1',
     resultLabel: '勝利',
     pollType: 'mom',
     body: POLL_PRESETS.mom.body,
-    outro: DEFAULT_OUTRO,
-    options: POLL_PRESETS.mom.options.slice(),
+    outro: DEFAULT_POST_OUTRO,
+    options: DEFAULT_PRE_OPTIONS.slice(),
     posFilter: 'ALL'
   };
 
   function saveState() {
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-    } catch (e) {}
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch (e) {}
   }
 
   function loadState() {
@@ -521,10 +606,17 @@
       var raw = localStorage.getItem(STORAGE_KEY);
       if (!raw) return;
       var p = JSON.parse(raw);
+      if (p.mode === 'pre' || p.mode === 'post') state.mode = p.mode;
       if (p.comp !== undefined) state.comp = p.comp;
       if (p.round !== undefined) state.round = p.round;
       if (p.ha === 'HOME' || p.ha === 'AWAY') state.ha = p.ha;
       if (p.opponent !== undefined) state.opponent = p.opponent;
+      if (p.preCatch !== undefined) state.preCatch = p.preCatch;
+      if (p.preTiming !== undefined) state.preTiming = p.preTiming;
+      if (p.preDatetime !== undefined) state.preDatetime = p.preDatetime;
+      if (p.preStadium !== undefined) state.preStadium = p.preStadium;
+      if (p.preHype !== undefined) state.preHype = p.preHype;
+      if (p.preSub !== undefined) state.preSub = p.preSub;
       if (p.scoreKashima !== undefined) state.scoreKashima = String(p.scoreKashima);
       if (p.scoreOpponent !== undefined) state.scoreOpponent = String(p.scoreOpponent);
       if (p.resultLabel !== undefined) state.resultLabel = p.resultLabel;
@@ -539,13 +631,39 @@
     document.getElementById('comp-input').value = state.comp;
     document.getElementById('round-input').value = state.round;
     document.getElementById('opponent-input').value = state.opponent;
+    document.getElementById('pre-catch-input').value = state.preCatch;
+    document.getElementById('pre-datetime-input').value = state.preDatetime;
+    document.getElementById('pre-stadium-input').value = state.preStadium;
+    document.getElementById('pre-hype-input').value = state.preHype;
+    document.getElementById('pre-sub-input').value = state.preSub;
     document.getElementById('score-kashima').value = state.scoreKashima;
     document.getElementById('score-opponent').value = state.scoreOpponent;
     document.getElementById('body-text').value = state.body;
     document.getElementById('outro-text').value = state.outro;
   }
 
-  function buildTitleLine() {
+  function buildPrePostBody() {
+    var timing = state.preTiming || '明日';
+    var haLabel = (state.ha === 'AWAY') ? 'アウェイで' : 'ホームで';
+    var opp = state.opponent || '対戦相手';
+    var catchTag = (state.preCatch || '').trim();
+    var titleLine = '【' + catchTag + timing + 'は' + haLabel + opp + '戦！勝利の立役者（MOM）を大予想！】';
+
+    var dt = (state.preDatetime || '').trim();
+    var stad = (state.preStadium || '').trim();
+    var compRound = [state.comp, state.round].filter(Boolean).join('');
+    var line1 = timing + (dt ? dt + 'は、' : 'は、') + (stad ? stad + 'で' : '') + (compRound ? compRound + '・' : '') + opp + '戦！⚽️🔥';
+    var line2 = (state.preHype || '').trim();
+    var subLine = (state.preSub || '').trim() || DEFAULT_PRE_SUB;
+    var askLine = timing + 'の' + opp + '戦で最も輝き、勝利に導くマン・オブ・ザ・マッチ（MOM）は誰になると思いますか？皆さんの予想をアンケートで教えてください！鹿島魂！';
+    var tags = '#鹿島アントラーズ #antlers #鹿syouチャンネル';
+
+    return [titleLine, '', line1, line2, '', subLine, '', askLine, '', tags].filter(function (v, idx, arr) {
+      return !(v === '' && arr[idx - 1] === '');
+    }).join('\n');
+  }
+
+  function buildPostMatchBody() {
     var parts = [];
     if (state.comp) parts.push(state.comp);
     if (state.round) parts.push(state.round);
@@ -556,18 +674,39 @@
       ? (state.scoreKashima + '-' + state.scoreOpponent)
       : '';
     var resPart = [scorePart, state.resultLabel].filter(Boolean).join(' ');
-    return ('【' + prefix + ' ' + haTag + '｜' + resPart + '】').replace(/\s+/g, ' ');
-  }
+    var titleLine = ('【' + prefix + ' ' + haTag + '｜' + resPart + '】').replace(/\s+/g, ' ');
 
-  function buildFullPostBody() {
-    var titleLine = buildTitleLine();
     var bodyText = (state.body || '').trim();
-    var outroText = (state.outro || '').trim() || DEFAULT_OUTRO;
+    var outroText = (state.outro || '').trim() || DEFAULT_POST_OUTRO;
     var tags = '#鹿島アントラーズ #antlers #鹿syouチャンネル';
     return [titleLine, '', bodyText, '', outroText, '', tags].join('\n');
   }
 
+  function buildFullPostBody() {
+    return (state.mode === 'pre') ? buildPrePostBody() : buildPostMatchBody();
+  }
+
+  function renderModeVisibility() {
+    var preSec = document.getElementById('pre-section');
+    var postSec = document.getElementById('post-section');
+    if (state.mode === 'pre') {
+      preSec.classList.remove('hidden');
+      postSec.classList.add('hidden');
+    } else {
+      preSec.classList.add('hidden');
+      postSec.classList.remove('hidden');
+    }
+  }
+
   function renderButtons() {
+    document.querySelectorAll('[data-action="mode"]').forEach(function (btn) {
+      var v = btn.getAttribute('data-val');
+      if (v === state.mode) {
+        btn.className = (v === 'pre') ? 'active-blue' : 'active-red';
+      } else {
+        btn.className = '';
+      }
+    });
     document.querySelectorAll('[data-action="comp"]').forEach(function (btn) {
       btn.className = (btn.getAttribute('data-val') === state.comp) ? 'active-red' : '';
     });
@@ -578,6 +717,15 @@
       } else {
         btn.className = '';
       }
+    });
+    document.querySelectorAll('[data-action="catch"]').forEach(function (btn) {
+      btn.className = (btn.getAttribute('data-val') === state.preCatch) ? 'active-blue' : '';
+    });
+    document.querySelectorAll('[data-action="timing"]').forEach(function (btn) {
+      btn.className = (btn.getAttribute('data-val') === state.preTiming) ? 'active-gold' : '';
+    });
+    document.querySelectorAll('[data-action="stadium"]').forEach(function (btn) {
+      btn.className = (btn.getAttribute('data-val') === state.preStadium) ? 'active-blue' : '';
     });
     document.querySelectorAll('[data-action="result"]').forEach(function (btn) {
       btn.className = (btn.getAttribute('data-val') === state.resultLabel) ? 'active-green' : '';
@@ -728,6 +876,7 @@
   }
 
   function renderAll() {
+    renderModeVisibility();
     renderButtons();
     renderOptions();
     renderPreview();
@@ -768,25 +917,40 @@
     }
   }
 
-  // すべてのボタン操作を一元処理
   document.addEventListener('click', function (e) {
     var btn = e.target.closest('button');
     if (!btn) return;
     var action = btn.getAttribute('data-action');
     if (!action) return;
 
-    if (action === 'reset') {
+    if (action === 'mode') {
+      var m = btn.getAttribute('data-val');
+      state.mode = m;
+      if (m === 'pre') {
+        state.options = DEFAULT_PRE_OPTIONS.slice();
+      } else {
+        state.options = POLL_PRESETS[state.pollType].options.slice();
+      }
+      saveState();
+      renderAll();
+    } else if (action === 'reset') {
       state.comp = '明治安田J1リーグ';
-      state.round = '第1節';
+      state.round = '第15節';
       state.ha = 'HOME';
-      state.opponent = '浦和レッズ';
+      state.opponent = '清水エスパルス';
+      state.preCatch = '【金J決戦！】';
+      state.preTiming = '明日';
+      state.preDatetime = '11/20（金）19:00';
+      state.preStadium = 'メルカリスタジアム';
+      state.preHype = 'ルヴァンカップ準決勝進出の勢いそのままに、金曜ナイターのホームゲームで確実に勝ち点3を掴み取りましょう！';
+      state.preSub = DEFAULT_PRE_SUB;
       state.scoreKashima = '2';
       state.scoreOpponent = '1';
       state.resultLabel = '勝利';
       state.pollType = 'mom';
       state.body = POLL_PRESETS.mom.body;
-      state.outro = DEFAULT_OUTRO;
-      state.options = POLL_PRESETS.mom.options.slice();
+      state.outro = DEFAULT_POST_OUTRO;
+      state.options = (state.mode === 'pre') ? DEFAULT_PRE_OPTIONS.slice() : POLL_PRESETS.mom.options.slice();
       syncInputs();
       saveState();
       renderAll();
@@ -798,13 +962,34 @@
       renderAll();
     } else if (action === 'step-round') {
       var cur = document.getElementById('round-input').value || '第1節';
-      var m = cur.match(/(\d+)/);
-      state.round = m ? cur.replace(/\d+/, String(Math.max(1, parseInt(m[1], 10) + 1))) : '第1節';
+      var match = cur.match(/(\d+)/);
+      state.round = match ? cur.replace(/\d+/, String(Math.max(1, parseInt(match[1], 10) + 1))) : '第1節';
       document.getElementById('round-input').value = state.round;
       saveState();
       renderAll();
     } else if (action === 'ha') {
       state.ha = btn.getAttribute('data-val');
+      if (state.ha === 'AWAY' && state.preStadium === 'メルカリスタジアム') {
+        state.preStadium = '敵地・アウェイ';
+        document.getElementById('pre-stadium-input').value = state.preStadium;
+      } else if (state.ha === 'HOME' && state.preStadium === '敵地・アウェイ') {
+        state.preStadium = 'メルカリスタジアム';
+        document.getElementById('pre-stadium-input').value = state.preStadium;
+      }
+      saveState();
+      renderAll();
+    } else if (action === 'catch') {
+      state.preCatch = btn.getAttribute('data-val');
+      document.getElementById('pre-catch-input').value = state.preCatch;
+      saveState();
+      renderAll();
+    } else if (action === 'timing') {
+      state.preTiming = btn.getAttribute('data-val');
+      saveState();
+      renderAll();
+    } else if (action === 'stadium') {
+      state.preStadium = btn.getAttribute('data-val');
+      document.getElementById('pre-stadium-input').value = state.preStadium;
       saveState();
       renderAll();
     } else if (action === 'result') {
@@ -878,7 +1063,6 @@
     }
   });
 
-  // 入力欄の変更を一元処理
   document.addEventListener('input', function (e) {
     var el = e.target;
     if (el.id === 'comp-input') {
@@ -888,6 +1072,18 @@
       state.round = el.value.trim();
     } else if (el.id === 'opponent-input') {
       state.opponent = el.value.trim();
+    } else if (el.id === 'pre-catch-input') {
+      state.preCatch = el.value;
+      renderButtons();
+    } else if (el.id === 'pre-datetime-input') {
+      state.preDatetime = el.value;
+    } else if (el.id === 'pre-stadium-input') {
+      state.preStadium = el.value;
+      renderButtons();
+    } else if (el.id === 'pre-hype-input') {
+      state.preHype = el.value;
+    } else if (el.id === 'pre-sub-input') {
+      state.preSub = el.value;
     } else if (el.id === 'score-kashima' || el.id === 'score-opponent') {
       state.scoreKashima = document.getElementById('score-kashima').value;
       state.scoreOpponent = document.getElementById('score-opponent').value;
