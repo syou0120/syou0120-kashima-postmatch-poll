@@ -3,1126 +3,761 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>鹿島アントラーズ アンケート作成ツール（試合前・試合後）</title>
+<title>鹿島アントラーズ 試合後アンケート＆ポスト作成メーカー</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&family=Noto+Sans+JP:wght@400;500;700;800;900&display=swap" rel="stylesheet">
 <style>
-  :root {
-    --bg: #0b1120;
-    --card: #111827;
-    --input: #030712;
-    --border: #334155;
-    --red: #991b1b;
-    --red-dark: #450a0a;
-    --gold: #fbbf24;
-    --gold-btn: #f59e0b;
-    --green: #059669;
-    --blue: #2563eb;
-    --text: #f8fafc;
-    --muted: #94a3b8;
-  }
-  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
   body {
-    margin: 0;
-    padding-bottom: 72px;
-    background: var(--bg);
-    color: var(--text);
-    font-family: -apple-system, BlinkMacSystemFont, "Hiragino Kaku Gothic ProN", "Noto Sans JP", sans-serif;
-    font-size: 14px;
-    line-height: 1.5;
+    font-family: 'Noto Sans JP', 'Inter', sans-serif;
+    background-color: #0b1120;
+    color: #f8fafc;
+    -webkit-tap-highlight-color: transparent;
   }
-  header {
-    position: sticky;
-    top: 0;
-    z-index: 20;
-    background: linear-gradient(90deg, var(--red) 0%, #7f1d1d 60%, var(--red-dark) 100%);
-    border-bottom: 1px solid rgba(251, 191, 36, 0.35);
-    padding: 10px 14px;
+  .antlers-header {
+    background: linear-gradient(90deg, #991b1b 0%, #7f1d1d 55%, #450a0a 100%);
   }
-  .header-inner {
-    max-width: 640px;
-    margin: 0 auto;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 8px;
+  .antlers-red {
+    background: linear-gradient(135deg, #b91c1c 0%, #7f1d1d 100%);
   }
-  h1 { margin: 0; font-size: 15px; font-weight: 900; color: #fff; }
-  .sub { margin: 0; font-size: 11px; color: #fde68a; }
-  main {
-    max-width: 640px;
-    margin: 0 auto;
-    padding: 12px;
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-  }
-  section {
-    background: var(--card);
-    border: 1px solid #1e293b;
-    border-radius: 16px;
-    padding: 14px;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-  }
-  section.highlight { border: 2px solid rgba(251, 191, 36, 0.55); }
-  h2 {
-    margin: 0;
-    font-size: 14px;
-    font-weight: 900;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-  .bar { width: 5px; height: 16px; border-radius: 99px; display: inline-block; }
-  .bar-red { background: #dc2626; }
-  .bar-gold { background: var(--gold); }
-  .bar-green { background: #10b981; }
-  .bar-blue { background: #3b82f6; }
-  label { display: block; font-size: 11px; font-weight: 700; color: var(--muted); margin-bottom: 4px; }
-  input[type="text"], input[type="number"], select, textarea {
-    width: 100%;
-    padding: 9px 11px;
-    border-radius: 10px;
-    border: 1px solid var(--border);
-    background: var(--input);
-    color: #fff;
-    font-size: 13px;
-    font-weight: 700;
-    font-family: inherit;
-  }
-  textarea { font-weight: 500; resize: vertical; }
-  input:focus, select:focus, textarea:focus { outline: none; border-color: var(--gold); }
-  button {
+  input[type="date"]::-webkit-calendar-picker-indicator {
+    filter: invert(1);
     cursor: pointer;
-    font-family: inherit;
-    font-weight: 800;
-    border-radius: 10px;
-    border: 1px solid var(--border);
-    background: var(--input);
-    color: #e2e8f0;
-    padding: 8px 10px;
-    font-size: 12px;
-    touch-action: manipulation;
   }
-  button:active { transform: scale(0.98); }
-  button.active-red { background: #b91c1c; color: #fff; border-color: var(--gold); }
-  button.active-gold { background: var(--gold-btn); color: #090d16; border-color: #fde68a; }
-  button.active-green { background: var(--green); color: #fff; border-color: #6ee7b7; }
-  button.active-blue { background: var(--blue); color: #fff; border-color: #93c5fd; }
-  .btn-reset { background: rgba(0,0,0,0.6); color: #fff; border-color: rgba(255,255,255,0.25); padding: 6px 10px; font-size: 11px; }
-  .btn-gold { background: var(--gold-btn); color: #090d16; border: none; font-weight: 900; }
-  .btn-yt {
-    display: block;
-    text-align: center;
-    text-decoration: none;
-    background: #b91c1c;
-    color: #fff;
-    font-weight: 900;
-    font-size: 13px;
-    padding: 12px;
-    border-radius: 12px;
-    border: 1px solid rgba(251, 191, 36, 0.45);
-  }
-  .mode-switch {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 8px;
-    background: #030712;
-    padding: 6px;
-    border-radius: 14px;
-    border: 1px solid #1e293b;
-  }
-  .mode-switch button {
-    padding: 10px;
-    font-size: 13px;
-    font-weight: 900;
-    border: none;
-  }
-  .row-wrap { display: flex; flex-wrap: wrap; gap: 6px; }
-  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-  .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
-  .grid-4 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px; }
-  @media (min-width: 480px) { .grid-4 { grid-template-columns: repeat(4, 1fr); } }
-  .flex-row { display: flex; align-items: center; gap: 6px; }
-  .score-box {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    background: var(--input);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 5px 8px;
-  }
-  .score-box input { width: 46px; text-align: center; padding: 6px 4px; font-size: 15px; }
-  .opt-num {
-    width: 26px;
-    height: 26px;
-    border-radius: 8px;
-    background: #1e293b;
-    color: var(--gold);
-    font-weight: 900;
-    font-size: 12px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-  }
-  pre {
-    margin: 0;
-    white-space: pre-wrap;
-    word-break: break-word;
-    background: var(--input);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 12px;
-    font-family: inherit;
-    font-size: 13px;
-    line-height: 1.6;
-    color: #fff;
-  }
-  .copy-opt-btn {
-    width: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 8px;
-    padding: 10px 12px;
-    text-align: left;
-  }
-  .badge-red { background: #991b1b; color: #fff; font-size: 10px; padding: 2px 6px; border-radius: 6px; flex-shrink: 0; }
-  .hidden { display: none !important; }
-  .modal-bg {
-    position: fixed;
-    inset: 0;
-    z-index: 50;
-    background: rgba(0, 0, 0, 0.82);
-    display: none;
-    align-items: flex-end;
-    justify-content: center;
-  }
-  .modal-bg.open { display: flex; }
-  @media (min-width: 540px) { .modal-bg { align-items: center; padding: 16px; } }
-  .modal-card {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 20px 20px 0 0;
-    width: 100%;
-    max-width: 500px;
-    max-height: 85vh;
-    padding: 16px;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-  }
-  @media (min-width: 540px) { .modal-card { border-radius: 18px; } }
-  .player-list { overflow-y: auto; display: flex; flex-direction: column; gap: 6px; flex: 1; }
-  .player-item {
-    width: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 9px 10px;
-    text-align: left;
-  }
-  .player-item.selected { background: rgba(245, 158, 11, 0.16); border-color: var(--gold); }
-  .num-badge {
-    width: 28px;
-    height: 28px;
-    border-radius: 8px;
-    background: linear-gradient(135deg, #b91c1c, #7f1d1d);
-    color: #fff;
-    font-weight: 900;
-    font-size: 12px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-  }
-  .toast {
-    position: fixed;
-    bottom: 20px;
-    left: 50%;
-    transform: translateX(-50%);
-    z-index: 60;
-    background: #1e293b;
-    color: #fff;
-    border: 1px solid var(--gold);
-    border-radius: 999px;
-    padding: 8px 16px;
-    font-size: 12px;
-    font-weight: 800;
-    display: none;
-    white-space: nowrap;
-    box-shadow: 0 8px 24px rgba(0,0,0,0.5);
-  }
-  .toast.show { display: block; }
 </style>
 </head>
-<body>
+<body class="min-h-screen pb-16">
 
-<header>
-  <div class="header-inner">
-    <div>
-      <h1>鹿島アンケート作成ツール</h1>
-      <p class="sub">鹿syouチャンネル用 · 試合前MOM予想＆試合後アンケート</p>
-    </div>
-    <button type="button" class="btn-reset" data-action="reset">リセット</button>
-  </div>
-</header>
-
-<main>
-  <!-- モード切替 -->
-  <div class="mode-switch">
-    <button type="button" data-action="mode" data-val="pre">🔥 試合前MOM予想</button>
-    <button type="button" data-action="mode" data-val="post">⚽ 試合後アンケート</button>
-  </div>
-
-  <!-- ① 共通試合情報 -->
-  <section>
-    <h2><span class="bar bar-red"></span>① 試合基本情報</h2>
-
-    <div>
-      <label>大会名</label>
-      <div class="row-wrap" style="margin-bottom:6px;">
-        <button type="button" data-action="comp" data-val="明治安田J1リーグ">明治安田J1リーグ</button>
-        <button type="button" data-action="comp" data-val="JリーグYBCルヴァンカップ">ルヴァンカップ</button>
-        <button type="button" data-action="comp" data-val="天皇杯">天皇杯</button>
-        <button type="button" data-action="comp" data-val="ACL">ACL</button>
+  <!-- ヘッダー -->
+  <header class="antlers-header border-b border-amber-400/30 sticky top-0 z-30">
+    <div class="max-w-3xl mx-auto px-4 py-2.5 flex items-center justify-between gap-2">
+      <div class="min-w-0">
+        <h1 class="text-sm sm:text-base font-black tracking-tight text-white truncate">試合後アンケート＆ポスト作成メーカー</h1>
+        <p class="text-[10px] text-amber-200/85 truncate">鹿島アントラーズ · Created by @syou0120</p>
       </div>
-      <input id="comp-input" type="text" value="明治安田J1リーグ" placeholder="大会名を直接入力">
+      <div class="flex items-center gap-1.5 shrink-0">
+        <button type="button" onclick="saveCurrentPreset()"
+          class="px-2.5 py-1.5 rounded-lg text-[11px] font-black bg-amber-400 hover:bg-amber-300 text-slate-950 shadow transition">
+          保存する
+        </button>
+        <button type="button" onclick="resetForm()"
+          class="px-2.5 py-1.5 rounded-lg text-[11px] font-bold bg-slate-950/75 hover:bg-slate-900 text-slate-100 border border-white/20 transition">
+          リセット
+        </button>
+      </div>
     </div>
+  </header>
 
-    <div class="grid-2">
-      <div>
-        <label>試合名（第〇節など）</label>
-        <div class="flex-row">
-          <input id="round-input" type="text" value="第15節" placeholder="例: 第15節">
-          <button type="button" data-action="step-round" style="flex-shrink:0; color:#fcd34d;">+1</button>
+  <main class="max-w-3xl mx-auto px-4 pt-4 space-y-4">
+
+    <!-- 1. 試合情報（大会・対戦相手・ホーム/アウェイ） -->
+    <section class="bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-3">
+      <div class="flex items-center justify-between">
+        <h2 class="text-xs sm:text-sm font-black text-white flex items-center gap-1.5">
+          <span class="w-1.5 h-4 bg-red-600 rounded-full"></span>
+          <span>1. 試合情報</span>
+        </h2>
+        <span class="text-[10px] text-emerald-400 font-bold">● 自動保存ON</span>
+      </div>
+
+      <!-- 大会選択 -->
+      <div class="space-y-1.5">
+        <label class="text-[11px] font-bold text-slate-400">大会</label>
+        <div class="flex flex-wrap gap-1.5" id="comp-buttons">
+          <button type="button" data-comp="明治安田J1リーグ" onclick="setCompetition(this)" class="comp-btn px-2.5 py-1 rounded-lg text-xs font-bold border transition">J1リーグ</button>
+          <button type="button" data-comp="ACLE" onclick="setCompetition(this)" class="comp-btn px-2.5 py-1 rounded-lg text-xs font-bold border transition">ACLE</button>
+          <button type="button" data-comp="ルヴァンカップ" onclick="setCompetition(this)" class="comp-btn px-2.5 py-1 rounded-lg text-xs font-bold border transition">ルヴァン杯</button>
+          <button type="button" data-comp="天皇杯" onclick="setCompetition(this)" class="comp-btn px-2.5 py-1 rounded-lg text-xs font-bold border transition">天皇杯</button>
+        </div>
+        <input id="competition-input" type="text" value="明治安田J1リーグ" oninput="onStateChange()"
+          placeholder="大会名・節（例: 明治安田J1リーグ 第15節）"
+          class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-xs sm:text-sm font-bold text-white focus:outline-none focus:border-amber-400">
+      </div>
+
+      <!-- ホーム / アウェイ & 対戦相手 -->
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+        <div class="space-y-1">
+          <label class="text-[11px] font-bold text-slate-400">会場区分</label>
+          <div class="grid grid-cols-2 gap-1.5">
+            <button type="button" id="venue-home-btn" onclick="setVenue('HOME')"
+              class="py-2 rounded-xl text-xs font-black border transition">HOME</button>
+            <button type="button" id="venue-away-btn" onclick="setVenue('AWAY')"
+              class="py-2 rounded-xl text-xs font-black border transition">AWAY</button>
+          </div>
+        </div>
+
+        <div class="sm:col-span-2 space-y-1">
+          <div class="flex items-center justify-between">
+            <label for="opponent-input" class="text-[11px] font-bold text-slate-400">対戦相手</label>
+            <button type="button" onclick="toggleJ1Dropdown()" class="text-[11px] font-bold text-amber-300 underline">
+              J1クラブから選ぶ <span id="j1-arrow">▼</span>
+            </button>
+          </div>
+          <input id="opponent-input" type="text" placeholder="例: 浦和レッズ" oninput="onStateChange()"
+            class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-xs sm:text-sm font-bold text-white focus:outline-none focus:border-amber-400">
         </div>
       </div>
-      <div>
-        <label>HOME / AWAY</label>
-        <div class="grid-2">
-          <button type="button" data-action="ha" data-val="HOME">HOME</button>
-          <button type="button" data-action="ha" data-val="AWAY">AWAY</button>
+
+      <!-- J1クラブ縦展開 -->
+      <div id="j1-club-list" class="hidden pt-2 border-t border-slate-800 grid grid-cols-2 sm:grid-cols-3 gap-1.5"></div>
+    </section>
+
+    <!-- 2. 日時選択（手入力不要・選択式） -->
+    <section class="bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-3">
+      <div class="flex items-center justify-between">
+        <h2 class="text-xs sm:text-sm font-black text-white flex items-center gap-1.5">
+          <span class="w-1.5 h-4 bg-amber-400 rounded-full"></span>
+          <span>2. キックオフ日時（選択式）</span>
+        </h2>
+        <span id="formatted-datetime-preview" class="text-xs font-black text-amber-300 bg-amber-500/10 border border-amber-400/30 px-2.5 py-0.5 rounded-full"></span>
+      </div>
+
+      <!-- 日付クイックボタン -->
+      <div class="flex items-center gap-1.5 flex-wrap">
+        <button type="button" onclick="setQuickDate(0)" class="px-2.5 py-1 rounded-lg text-xs font-bold bg-slate-950 hover:bg-slate-800 text-slate-200 border border-slate-700 transition">今日</button>
+        <button type="button" onclick="setQuickDate(1)" class="px-2.5 py-1 rounded-lg text-xs font-bold bg-slate-950 hover:bg-slate-800 text-slate-200 border border-slate-700 transition">明日</button>
+        <button type="button" onclick="setNextWeekend(6)" class="px-2.5 py-1 rounded-lg text-xs font-bold bg-slate-950 hover:bg-slate-800 text-slate-200 border border-slate-700 transition">次の土曜</button>
+        <button type="button" onclick="setNextWeekend(0)" class="px-2.5 py-1 rounded-lg text-xs font-bold bg-slate-950 hover:bg-slate-800 text-slate-200 border border-slate-700 transition">次の日曜</button>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+        <div class="space-y-1">
+          <label for="match-date" class="text-[11px] font-bold text-slate-400">日付を選択</label>
+          <input id="match-date" type="date" onchange="onStateChange()"
+            class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-xs sm:text-sm font-bold text-white focus:outline-none focus:border-amber-400">
+        </div>
+
+        <div class="space-y-1">
+          <label for="match-time" class="text-[11px] font-bold text-slate-400">キックオフ時刻を選択</label>
+          <select id="match-time" onchange="onStateChange()"
+            class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-xs sm:text-sm font-bold text-white focus:outline-none focus:border-amber-400">
+            <option value="13:00">13:00 KO</option>
+            <option value="13:05">13:05 KO</option>
+            <option value="14:00" selected>14:00 KO</option>
+            <option value="14:05">14:05 KO</option>
+            <option value="15:00">15:00 KO</option>
+            <option value="15:05">15:05 KO</option>
+            <option value="16:00">16:00 KO</option>
+            <option value="17:00">17:00 KO</option>
+            <option value="18:00">18:00 KO</option>
+            <option value="18:30">18:30 KO</option>
+            <option value="19:00">19:00 KO</option>
+            <option value="19:05">19:05 KO</option>
+            <option value="19:30">19:30 KO</option>
+            <option value="20:00">20:00 KO</option>
+            <option value="21:00">21:00 KO</option>
+            <option value="">時刻なし（日付のみ）</option>
+          </select>
         </div>
       </div>
-    </div>
+    </section>
 
-    <div>
-      <label>対戦相手</label>
-      <div class="grid-2">
-        <select id="opponent-select">
-          <option value="">一覧から選択...</option>
-          <option value="浦和レッズ">浦和レッズ</option>
-          <option value="FC東京">FC東京</option>
-          <option value="東京ヴェルディ">東京ヴェルディ</option>
-          <option value="FC町田ゼルビア">FC町田ゼルビア</option>
-          <option value="川崎フロンターレ">川崎フロンターレ</option>
-          <option value="横浜F・マリノス">横浜F・マリノス</option>
-          <option value="横浜FC">横浜FC</option>
-          <option value="湘南ベルマーレ">湘南ベルマーレ</option>
-          <option value="柏レイソル">柏レイソル</option>
-          <option value="ジェフユナイテッド千葉">ジェフユナイテッド千葉</option>
-          <option value="水戸ホーリーホック">水戸ホーリーホック</option>
-          <option value="アルビレックス新潟">アルビレックス新潟</option>
-          <option value="清水エスパルス">清水エスパルス</option>
-          <option value="名古屋グランパス">名古屋グランパス</option>
-          <option value="京都サンガF.C.">京都サンガF.C.</option>
-          <option value="ガンバ大阪">ガンバ大阪</option>
-          <option value="セレッソ大阪">セレッソ大阪</option>
-          <option value="ヴィッセル神戸">ヴィッセル神戸</option>
-          <option value="ファジアーノ岡山">ファジアーノ岡山</option>
-          <option value="サンフレッチェ広島">サンフレッチェ広島</option>
-          <option value="アビスパ福岡">アビスパ福岡</option>
-        </select>
-        <input id="opponent-input" type="text" value="清水エスパルス" placeholder="対戦相手名">
-      </div>
-    </div>
-  </section>
+    <!-- 3. 試合結果・MOM候補（ポスト＆アンケート用） -->
+    <section class="bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-3">
+      <h2 class="text-xs sm:text-sm font-black text-white flex items-center gap-1.5">
+        <span class="w-1.5 h-4 bg-red-600 rounded-full"></span>
+        <span>3. スコア＆MOMアンケート候補</span>
+      </h2>
 
-  <!-- ②-A 試合前MOM予想用設定 -->
-  <section id="pre-section">
-    <h2><span class="bar bar-blue"></span>② 試合前MOM予想の設定</h2>
+      <div class="grid grid-cols-3 gap-2 items-end">
+        <div class="space-y-1">
+          <label for="score-kashima" class="text-[11px] font-bold text-amber-300">鹿島 得点</label>
+          <select id="score-kashima" onchange="onStateChange()"
+            class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-sm font-black text-white text-center focus:outline-none focus:border-amber-400">
+            <option value="">-</option>
+            <option value="0">0</option>
+            <option value="1" selected>1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+            <option value="4">4</option>
+            <option value="5">5</option>
+            <option value="6">6</option>
+          </select>
+        </div>
 
-    <div>
-      <label>見出しキャッチフレーズ</label>
-      <div class="row-wrap" style="margin-bottom:6px;">
-        <button type="button" data-action="catch" data-val="【金J決戦！】">【金J決戦！】</button>
-        <button type="button" data-action="catch" data-val="【ホーム決戦！】">【ホーム決戦！】</button>
-        <button type="button" data-action="catch" data-val="【アウェイ決戦！】">【アウェイ決戦！】</button>
-        <button type="button" data-action="catch" data-val="【負けられない一戦！】">【負けられない一戦！】</button>
-        <button type="button" data-action="catch" data-val="【首位攻防戦！】">【首位攻防戦！】</button>
-      </div>
-      <input id="pre-catch-input" type="text" value="【金J決戦！】" placeholder="キャッチフレーズ">
-    </div>
+        <div class="text-center pb-2 text-xs font-black text-slate-400">VS</div>
 
-    <div class="grid-2">
-      <div>
-        <label>タイミング表記</label>
-        <div class="grid-3">
-          <button type="button" data-action="timing" data-val="明日">明日</button>
-          <button type="button" data-action="timing" data-val="本日">本日</button>
-          <button type="button" data-action="timing" data-val="今週末">今週末</button>
+        <div class="space-y-1">
+          <label for="score-opponent" class="text-[11px] font-bold text-slate-400">相手 得点</label>
+          <select id="score-opponent" onchange="onStateChange()"
+            class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-sm font-black text-white text-center focus:outline-none focus:border-amber-400">
+            <option value="">-</option>
+            <option value="0" selected>0</option>
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+            <option value="4">4</option>
+            <option value="5">5</option>
+            <option value="6">6</option>
+          </select>
         </div>
       </div>
-      <div>
-        <label>日時（例: 11/20（金）19:00）</label>
-        <input id="pre-datetime-input" type="text" value="11/20（金）19:00" placeholder="例: 11/20（金）19:00">
-      </div>
-    </div>
 
-    <div>
-      <label>スタジアム・会場</label>
-      <div class="row-wrap" style="margin-bottom:6px;">
-        <button type="button" data-action="stadium" data-val="メルカリスタジアム">メルカリスタジアム</button>
-        <button type="button" data-action="stadium" data-val="国立競技場">国立競技場</button>
-        <button type="button" data-action="stadium" data-val="敵地・アウェイ">敵地・アウェイ</button>
-      </div>
-      <input id="pre-stadium-input" type="text" value="メルカリスタジアム" placeholder="スタジアム名">
-    </div>
-
-    <div>
-      <label>意気込み・見どころメッセージ（2行目）</label>
-      <textarea id="pre-hype-input" rows="2">ルヴァンカップ準決勝進出の勢いそのままに、金曜ナイターのホームゲームで確実に勝ち点3を掴み取りましょう！</textarea>
-    </div>
-
-    <div>
-      <label>チャンネル登録呼びかけ文（自動挿入・編集可）</label>
-      <textarea id="pre-sub-input" rows="2">スタジアムの熱い応援や現地ならではのリアルな雰囲気も随時発信中！まだの方はぜひチャンネル登録をして、一緒にアントラーズを後押ししましょう！🦌✨</textarea>
-    </div>
-  </section>
-
-  <!-- ②-B 試合後アンケート用設定 -->
-  <section id="post-section" class="hidden">
-    <h2><span class="bar bar-gold"></span>② 試合結果・アンケート種類（試合後）</h2>
-
-    <div>
-      <label>試合結果（左: 鹿島 ／ 右: 相手）</label>
-      <div class="flex-row" style="flex-wrap:wrap;">
-        <div class="score-box">
-          <span style="font-size:11px;font-weight:900;color:#f87171;">鹿島</span>
-          <input id="score-kashima" type="number" min="0" max="20" value="2">
-          <span style="font-weight:900;color:#94a3b8;">-</span>
-          <input id="score-opponent" type="number" min="0" max="20" value="1">
-          <span style="font-size:11px;font-weight:700;color:#94a3b8;">相手</span>
-        </div>
-        <div class="grid-3" style="flex:1; min-width:160px;">
-          <button type="button" data-action="result" data-val="勝利">勝利</button>
-          <button type="button" data-action="result" data-val="引き分け">引分</button>
-          <button type="button" data-action="result" data-val="敗戦">敗戦</button>
+      <!-- アンケート4択（MOM候補） -->
+      <div class="space-y-1.5 pt-1">
+        <label class="text-[11px] font-bold text-slate-400">Xアンケート4択（今日のMOM・印象に残った選手）</label>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+          <input id="poll-opt-1" type="text" value="鈴木優磨" placeholder="選択肢1（例: 鈴木優磨）" oninput="onStateChange()"
+            class="px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-xs font-bold text-white focus:outline-none focus:border-amber-400">
+          <input id="poll-opt-2" type="text" value="レオ・セアラ" placeholder="選択肢2（例: レオ・セアラ）" oninput="onStateChange()"
+            class="px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-xs font-bold text-white focus:outline-none focus:border-amber-400">
+          <input id="poll-opt-3" type="text" value="早川友基" placeholder="選択肢3（例: 早川友基）" oninput="onStateChange()"
+            class="px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-xs font-bold text-white focus:outline-none focus:border-amber-400">
+          <input id="poll-opt-4" type="text" value="チーム全員（リプ欄へ！）" placeholder="選択肢4（例: チーム全員）" oninput="onStateChange()"
+            class="px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-xs font-bold text-white focus:outline-none focus:border-amber-400">
         </div>
       </div>
-    </div>
+    </section>
 
-    <div class="grid-4">
-      <button type="button" data-action="poll-type" data-val="mom">今日のMOM</button>
-      <button type="button" data-action="poll-type" data-val="rating">試合の評価</button>
-      <button type="button" data-action="poll-type" data-val="point">勝因・ポイント</button>
-      <button type="button" data-action="poll-type" data-val="custom">自由入力</button>
-    </div>
-
-    <div>
-      <label>質問文・本文メッセージ</label>
-      <textarea id="body-text" rows="3"></textarea>
-    </div>
-
-    <div>
-      <label>末尾の結び文（チャンネル登録＆次回予告は必ず入ります）</label>
-      <textarea id="outro-text" rows="2"></textarea>
-    </div>
-  </section>
-
-  <!-- ③ 選択肢 -->
-  <section>
-    <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;">
-      <h2><span class="bar bar-green"></span>③ アンケート選択肢（最大5個）</h2>
-      <button type="button" class="btn-gold" data-action="open-modal">＋ 選手から選ぶ</button>
-    </div>
-
-    <div id="options-container" style="display:flex;flex-direction:column;gap:8px;"></div>
-
-    <div>
-      <label>ワンタップ追加</label>
-      <div class="row-wrap">
-        <button type="button" data-action="quick-opt" data-val="その他（コメント欄で予想！）" style="color:#fde68a;">+ その他（コメント欄で予想！）</button>
-        <button type="button" data-action="quick-opt" data-val="チーム全員がMOM！">+ チーム全員がMOM！</button>
-        <button type="button" data-action="quick-opt" data-val="その他（コメント欄へ！）">+ その他（コメント欄へ！）</button>
+    <!-- 4. 意気込み・見どころメッセージ（2行目）＋ AI自動生成ボタン -->
+    <section class="bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-2.5">
+      <div class="flex items-center justify-between gap-2 flex-wrap">
+        <label for="message-line2" class="text-xs sm:text-sm font-black text-white flex items-center gap-1.5">
+          <span class="w-1.5 h-4 bg-amber-400 rounded-full"></span>
+          <span>4. 意気込み・見どころメッセージ（2行目）</span>
+        </label>
+        <div class="flex items-center gap-1.5">
+          <select id="ai-tone" class="px-2 py-1.5 rounded-lg bg-slate-950 border border-slate-700 text-[11px] font-bold text-slate-200 focus:outline-none focus:border-amber-400">
+            <option value="hot">熱いサポ風</option>
+            <option value="highlight">見どころ・戦術風</option>
+            <option value="prematch">試合前ワクワク風</option>
+          </select>
+          <button type="button" onclick="generateAIMessage()"
+            class="px-3 py-1.5 rounded-lg text-xs font-black bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 text-slate-950 shadow transition flex items-center gap-1">
+            <span>✨ AIで自動生成</span>
+          </button>
+        </div>
       </div>
-    </div>
-  </section>
 
-  <!-- ④ 出力プレビュー -->
-  <section class="highlight">
-    <div style="display:flex;align-items:center;justify-content:space-between;">
-      <h2 style="color:#fcd34d;">④ YouTube投稿用テキスト出力</h2>
-      <span style="font-size:11px;color:#94a3b8;">コピペしてそのまま投稿OK</span>
-    </div>
+      <textarea id="message-line2" rows="2" oninput="onStateChange()"
+        placeholder="2行目に入る意気込み・見どころ・振り返りコメント"
+        class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-xs sm:text-sm font-bold text-amber-100 focus:outline-none focus:border-amber-400"></textarea>
+      <p class="text-[10px] text-slate-400">※「✨ AIで自動生成」を押すたびに、対戦相手・スコア・MOM候補を踏まえた別バリエーションに切り替わります。</p>
+    </section>
 
+    <!-- 5. 生成プレビュー＆Xポスト・コピー -->
+    <section class="bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-3">
+      <div class="flex items-center justify-between">
+        <h2 class="text-xs sm:text-sm font-black text-white flex items-center gap-1.5">
+          <span class="w-1.5 h-4 bg-emerald-400 rounded-full"></span>
+          <span>5. ポスト文プレビュー</span>
+        </h2>
+        <span id="char-count" class="text-[11px] font-bold text-slate-400">0 文字</span>
+      </div>
+
+      <pre id="post-preview" class="whitespace-pre-wrap break-words p-3.5 rounded-xl bg-slate-950 border border-slate-800 text-xs sm:text-sm leading-relaxed text-slate-100 font-sans"></pre>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+        <button type="button" onclick="postToX()"
+          class="w-full py-3 px-4 rounded-xl font-black text-xs sm:text-sm bg-amber-500 hover:bg-amber-400 text-slate-950 shadow transition">
+          Xでポスト画面を開く
+        </button>
+        <button type="button" onclick="copyPostText()"
+          class="w-full py-3 px-4 rounded-xl font-black text-xs sm:text-sm bg-slate-800 hover:bg-slate-700 text-white border border-slate-700 transition">
+          ポスト文をコピー
+        </button>
+      </div>
+    </section>
+
+    <!-- 6. 保存済みテンプレート一覧（最大5件） -->
+    <section class="bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-2.5">
+      <div class="flex items-center justify-between">
+        <h2 class="text-xs sm:text-sm font-black text-white flex items-center gap-1.5">
+          <span class="w-1.5 h-4 bg-amber-400 rounded-full"></span>
+          <span>保存済みデータ（最大5件）</span>
+        </h2>
+        <button type="button" onclick="saveCurrentPreset()"
+          class="px-3 py-1 rounded-lg text-[11px] font-black bg-amber-500 hover:bg-amber-400 text-slate-950 transition">
+          ＋ 今の内容を保存
+        </button>
+      </div>
+      <div id="saved-presets-list" class="space-y-1.5"></div>
+    </section>
+
+  </main>
+
+  <footer class="max-w-3xl mx-auto px-4 mt-8 pt-4 border-t border-slate-800/80 text-center space-y-1 text-[11px] text-slate-400">
     <div>
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
-        <span style="font-size:12px;font-weight:700;">投稿タイトル＆本文</span>
-        <button type="button" class="btn-gold" data-action="copy-body">本文をコピー</button>
-      </div>
-      <pre id="preview-body"></pre>
+      <a href="https://www.youtube.com/@syou0120" target="_blank" rel="noopener noreferrer"
+        class="text-amber-300 hover:text-amber-200 underline font-bold">
+        Youtubeの鹿syouチャンネル
+      </a>
     </div>
+    <div class="text-slate-500">Created by @syou0120</div>
+  </footer>
 
-    <div>
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
-        <span style="font-size:12px;font-weight:700;">選択肢（タップで1つずつコピー）</span>
-        <button type="button" data-action="copy-all">全部まとめてコピー</button>
-      </div>
-      <div id="preview-options-copy" style="display:flex;flex-direction:column;gap:6px;"></div>
-    </div>
-
-    <a class="btn-yt" href="https://www.youtube.com/@syou0120/community" target="_blank" rel="noopener noreferrer">
-      YouTubeの投稿画面を開く（@syou0120）
-    </a>
-  </section>
-</main>
-
-<!-- 選手選択モーダル -->
-<div id="player-modal" class="modal-bg">
-  <div class="modal-card">
-    <div style="display:flex;align-items:center;justify-content:space-between;">
-      <div>
-        <div style="font-weight:900;font-size:15px;">選択肢に入れる選手をタップ</div>
-        <div id="modal-slot-count" style="font-size:11px;font-weight:800;color:#fcd34d;">現在 0 / 5 項目設定中</div>
-      </div>
-      <button type="button" data-action="close-modal">✕ 閉じる</button>
-    </div>
-
-    <div class="row-wrap">
-      <button type="button" data-action="pos-filter" data-val="ALL">ALL</button>
-      <button type="button" data-action="pos-filter" data-val="GK">GK</button>
-      <button type="button" data-action="pos-filter" data-val="DF">DF</button>
-      <button type="button" data-action="pos-filter" data-val="MF">MF</button>
-      <button type="button" data-action="pos-filter" data-val="FW">FW</button>
-    </div>
-
-    <input id="player-search" type="text" placeholder="背番号・選手名で検索...">
-    <div id="player-list" class="player-list"></div>
-  </div>
-</div>
-
-<div id="toast" class="toast"></div>
+  <!-- トースト通知 -->
+  <div id="toast" class="fixed bottom-5 left-1/2 -translate-x-1/2 z-50 hidden px-4 py-2 rounded-full bg-slate-800 text-white text-xs font-bold border border-amber-400/50 shadow-xl whitespace-nowrap"></div>
 
 <script>
-(function () {
-  var STORAGE_KEY = 'kashima_poll_tool_v3';
-  var DEFAULT_POST_OUTRO = '📢 次の試合もアンケート投稿やるよ！ぜひチャンネル登録して待っていてね🔥';
-  var DEFAULT_PRE_SUB = 'スタジアムの熱い応援や現地ならではのリアルな雰囲気も随時発信中！まだの方はぜひチャンネル登録をして、一緒にアントラーズを後押ししましょう！🦌✨';
+const AUTO_SAVE_KEY = 'kashima_postmatch_poll_autosave_v1';
+const PRESETS_KEY = 'kashima_postmatch_poll_presets_v1';
+const MAX_PRESETS = 5;
 
-  var PLAYERS = [
-    { number: 1, name: '早川友基', pos: 'GK' },
-    { number: 21, name: '山田大樹', pos: 'GK' },
-    { number: 29, name: '梶川裕嗣', pos: 'GK' },
-    { number: 31, name: '藤井陽登', pos: 'GK' },
-    { number: 2, name: '安西幸輝', pos: 'DF' },
-    { number: 3, name: 'キム・テヒョン', pos: 'DF' },
-    { number: 4, name: '千田海人', pos: 'DF' },
-    { number: 5, name: '関川郁万', pos: 'DF' },
-    { number: 7, name: '小川諒也', pos: 'DF' },
-    { number: 19, name: '大森渚生', pos: 'DF' },
-    { number: 23, name: '津久井佳佑', pos: 'DF' },
-    { number: 25, name: '小池龍太', pos: 'DF' },
-    { number: 28, name: '大川佑梧', pos: 'DF' },
-    { number: 32, name: '松本遥翔', pos: 'DF' },
-    { number: 35, name: '元砂晏翔仁ウデンバ', pos: 'DF' },
-    { number: 37, name: '広瀬隆斗', pos: 'DF' },
-    { number: 45, name: '倉橋幸輝', pos: 'DF' },
-    { number: 55, name: '植田直通', pos: 'DF' },
-    { number: 6, name: '三竿健斗', pos: 'MF' },
-    { number: 8, name: 'マテウス・ブエノ', pos: 'MF' },
-    { number: 10, name: '柴崎岳', pos: 'MF' },
-    { number: 14, name: '樋口雄太', pos: 'MF' },
-    { number: 24, name: '林晴己', pos: 'MF' },
-    { number: 27, name: '松村優太', pos: 'MF' },
-    { number: 42, name: '大貫琉偉', pos: 'MF' },
-    { number: 43, name: '福岡勇和', pos: 'MF' },
-    { number: 44, name: '平島大悟', pos: 'MF' },
-    { number: 46, name: '岩土そら', pos: 'MF' },
-    { number: 9, name: 'レオ・セアラ', pos: 'FW' },
-    { number: 11, name: '田川亨介', pos: 'FW' },
-    { number: 17, name: 'エウベル', pos: 'FW' },
-    { number: 18, name: 'ヤン・マテウス', pos: 'FW' },
-    { number: 30, name: '吉田湊海', pos: 'FW' },
-    { number: 34, name: '徳田誉', pos: 'FW' },
-    { number: 40, name: '鈴木優磨', pos: 'FW' },
-    { number: 47, name: '高木瑛人', pos: 'FW' },
-    { number: 48, name: '滝澤周生', pos: 'FW' },
-    { number: 77, name: 'チャヴリッチ', pos: 'FW' }
+const J1_OTHER_CLUBS = [
+  '水戸ホーリーホック',
+  '浦和レッズ',
+  'ジェフユナイテッド千葉',
+  '柏レイソル',
+  'FC東京',
+  '東京ヴェルディ',
+  'FC町田ゼルビア',
+  '川崎フロンターレ',
+  '横浜F・マリノス',
+  '清水エスパルス',
+  '名古屋グランパス',
+  '京都サンガF.C.',
+  'ガンバ大阪',
+  'セレッソ大阪',
+  'ヴィッセル神戸',
+  'ファジアーノ岡山',
+  'サンフレッチェ広島',
+  'アビスパ福岡',
+  'V・ファーレン長崎'
+];
+
+let state = {
+  competition: '明治安田J1リーグ',
+  venue: 'HOME',
+  opponent: '浦和レッズ',
+  matchDate: '',
+  matchTime: '14:00',
+  scoreKashima: '1',
+  scoreOpponent: '0',
+  pollOpts: ['鈴木優磨', 'レオ・セアラ', '早川友基', 'チーム全員（リプ欄へ！）'],
+  messageLine2: '最後まで全員で走り抜いた価値ある勝点3！今日のMOMは誰？🔥',
+  aiTone: 'hot',
+  aiIndex: 0,
+  j1Open: false,
+  presets: []
+};
+
+function getTodayISO(offsetDays = 0) {
+  const d = new Date();
+  d.setDate(d.getDate() + offsetDays);
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${y}-${m}-${day}`;
+}
+
+function formatJapaneseDateTime(dateStr, timeStr) {
+  if (!dateStr) return timeStr ? `${timeStr} KO` : '';
+  const parts = dateStr.split('-');
+  if (parts.length !== 3) return dateStr;
+  const y = Number(parts[0]);
+  const m = Number(parts[1]);
+  const d = Number(parts[2]);
+  const dt = new Date(y, m - 1, d);
+  const weekdays = ['日', '月', '火', '水', '木', '金', '土'];
+  const w = weekdays[dt.getDay()];
+  return timeStr ? `${m}/${d}(${w}) ${timeStr} KO` : `${m}/${d}(${w})`;
+}
+
+function loadSavedData() {
+  state.matchDate = getTodayISO(0);
+  try {
+    const raw = localStorage.getItem(AUTO_SAVE_KEY);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      Object.assign(state, parsed);
+      if (!state.matchDate) state.matchDate = getTodayISO(0);
+    }
+    const pRaw = localStorage.getItem(PRESETS_KEY);
+    if (pRaw) {
+      const pParsed = JSON.parse(pRaw);
+      if (Array.isArray(pParsed)) state.presets = pParsed.slice(0, MAX_PRESETS);
+    }
+  } catch (e) {}
+}
+
+function saveAutoData() {
+  try {
+    localStorage.setItem(AUTO_SAVE_KEY, JSON.stringify({
+      competition: state.competition,
+      venue: state.venue,
+      opponent: state.opponent,
+      matchDate: state.matchDate,
+      matchTime: state.matchTime,
+      scoreKashima: state.scoreKashima,
+      scoreOpponent: state.scoreOpponent,
+      pollOpts: state.pollOpts,
+      messageLine2: state.messageLine2,
+      aiTone: state.aiTone
+    }));
+  } catch (e) {}
+}
+
+function syncDOMFromState() {
+  document.getElementById('competition-input').value = state.competition;
+  document.getElementById('opponent-input').value = state.opponent;
+  document.getElementById('match-date').value = state.matchDate;
+  document.getElementById('match-time').value = state.matchTime;
+  document.getElementById('score-kashima').value = state.scoreKashima;
+  document.getElementById('score-opponent').value = state.scoreOpponent;
+  document.getElementById('poll-opt-1').value = state.pollOpts[0] || '';
+  document.getElementById('poll-opt-2').value = state.pollOpts[1] || '';
+  document.getElementById('poll-opt-3').value = state.pollOpts[2] || '';
+  document.getElementById('poll-opt-4').value = state.pollOpts[3] || '';
+  document.getElementById('message-line2').value = state.messageLine2;
+  document.getElementById('ai-tone').value = state.aiTone || 'hot';
+}
+
+function onStateChange() {
+  state.competition = document.getElementById('competition-input').value;
+  state.opponent = document.getElementById('opponent-input').value;
+  state.matchDate = document.getElementById('match-date').value;
+  state.matchTime = document.getElementById('match-time').value;
+  state.scoreKashima = document.getElementById('score-kashima').value;
+  state.scoreOpponent = document.getElementById('score-opponent').value;
+  state.pollOpts = [
+    document.getElementById('poll-opt-1').value,
+    document.getElementById('poll-opt-2').value,
+    document.getElementById('poll-opt-3').value,
+    document.getElementById('poll-opt-4').value
   ];
+  state.messageLine2 = document.getElementById('message-line2').value;
+  state.aiTone = document.getElementById('ai-tone').value;
 
-  var POLL_PRESETS = {
-    mom: {
-      body: '試合お疲れさまでした！\n今日のMOM（マン・オブ・ザ・マッチ）は誰だと思いますか？\n🗣️ 鹿サポの感想・声援、ぜひコメントで教えてください！',
-      options: ['#40 鈴木優磨', '#9 レオ・セアラ', '#1 早川友基', '#55 植田直通', 'チーム全員がMOM！']
-    },
-    rating: {
-      body: '試合お疲れさまでした！\n今日の試合内容・パフォーマンスの評価は？\n🗣️ 良かった点や次節への期待などコメント欄へ！',
-      options: ['最高！文句なしの試合！', '内容も結果も納得！', '課題はあるが次に繋がる！', '悔しい…次節こそリベンジ！', '']
-    },
-    point: {
-      body: '試合お疲れさまでした！\n今日の試合で一番印象に残ったポイントはどこですか？\n🗣️ 熱い感想をコメント欄で教えてください！',
-      options: ['前線の決定力・ゴールシーン', '中盤の強度・ゲームメイク', '守備陣の集中力・クリーンシート意識', '途中交代選手の活躍', 'スタジアムの雰囲気・後押し']
-    },
-    custom: {
-      body: '試合お疲れさまでした！\n🗣️ 鹿サポの感想・声援、ぜひコメントで教えてください！',
-      options: ['', '', '', '', '']
+  saveAutoData();
+  renderUI();
+}
+
+function setCompetition(btn) {
+  const comp = btn.dataset.comp;
+  state.competition = comp;
+  document.getElementById('competition-input').value = comp;
+  saveAutoData();
+  renderUI();
+}
+
+function setVenue(v) {
+  state.venue = v;
+  saveAutoData();
+  renderUI();
+}
+
+function toggleJ1Dropdown() {
+  state.j1Open = !state.j1Open;
+  renderUI();
+}
+
+function selectJ1Club(btn) {
+  const club = decodeURIComponent(btn.dataset.clubEncoded);
+  state.opponent = club;
+  state.j1Open = false;
+  document.getElementById('opponent-input').value = club;
+  saveAutoData();
+  renderUI();
+}
+
+function setQuickDate(offsetDays) {
+  state.matchDate = getTodayISO(offsetDays);
+  document.getElementById('match-date').value = state.matchDate;
+  saveAutoData();
+  renderUI();
+}
+
+function setNextWeekend(targetDay) {
+  const d = new Date();
+  const diff = (targetDay - d.getDay() + 7) % 7 || 7;
+  setQuickDate(diff);
+}
+
+// AI風メッセージ自動生成（API不要・状況別バリエーション）
+function generateAIMessage() {
+  const opp = (state.opponent || '相手').trim();
+  const comp = (state.competition || '試合').trim();
+  const tone = document.getElementById('ai-tone').value;
+  const k = state.scoreKashima;
+  const o = state.scoreOpponent;
+  const p1 = (state.pollOpts[0] || '').trim();
+  const p2 = (state.pollOpts[1] || '').trim();
+  const isHome = state.venue === 'HOME';
+
+  let outcome = 'neutral';
+  if (k !== '' && o !== '') {
+    if (Number(k) > Number(o)) outcome = 'win';
+    else if (Number(k) < Number(o)) outcome = 'lose';
+    else outcome = 'draw';
+  }
+
+  const candidates = [];
+
+  if (tone === 'prematch') {
+    candidates.push(
+      `${isHome ? '聖地カシマ' : 'アウェイの地'}で${opp}撃破へ！今日の注目選手・期待するキーマンは誰？🔥`,
+      `${comp}・${opp}戦！勝利あるのみ、あなたが一番期待している選手に投票しよう🦌⚡`,
+      `キックオフ目前！${opp}戦の勝負を分けるキーマンは誰になると思う？👊`
+    );
+  } else if (tone === 'highlight') {
+    if (outcome === 'win') {
+      candidates.push(
+        `攻守の切り替えと球際の強さで${opp}を圧倒！今日の勝利の立役者（MOM）は誰？⚽`,
+        `${k}-${o}の快勝！${p1 ? p1 + 'らの活躍' : 'チーム全体の連動'}が光った一戦、一番輝いた選手は？✨`
+      );
+    } else if (outcome === 'draw') {
+      candidates.push(
+        `一進一退の攻防となった${opp}戦！苦しい展開の中で最も存在感を放った選手は？🔥`,
+        `勝点1を分け合った${opp}戦。次につながるプレーを見せた今日のMVPは誰？👏`
+      );
+    } else if (outcome === 'lose') {
+      candidates.push(
+        `悔しい敗戦となった${opp}戦。それでも最後まで戦う姿勢を見せた選手に一票を！🦌`,
+        `課題を次節へ繋げよう！${opp}戦で最も気持ちを前面に出していた選手は誰？🔥`
+      );
+    } else {
+      candidates.push(
+        `${opp}戦の見どころは中盤の主導権争い！今日のカギを握る選手は誰だと思う？⚽`,
+        `${p1 && p2 ? `${p1}や${p2}の仕掛け` : '鹿島らしい堅守速攻'}に注目！今日のキーマンは誰？🔥`
+      );
+    }
+  } else {
+    // hot（熱いサポ風）
+    if (outcome === 'win') {
+      candidates.push(
+        `やったぞ鹿島！！${opp}に${k}-${o}で勝利！今日のMOMは誰だ！？🔥🦌`,
+        `最高の結果！${isHome ? 'カシマ' : 'アウェイ'}で掴み取った勝点3、一番輝いていた選手に投票しよう！⚡`,
+        `全員のハードワークで${opp}撃破！勝利の立役者だと思う選手を教えて！🙌`
+      );
+    } else if (outcome === 'draw') {
+      candidates.push(
+        `激闘の${opp}戦は${k}-${o}のドロー！最後まで走り抜いた今日のMOMは誰？🔥`,
+        `勝点1を死守！${opp}相手に気持ちを見せた今日のMVPを選ぼう！🦌`
+      );
+    } else if (outcome === 'lose') {
+      candidates.push(
+        `悔しい結果だけど前を向こう！${opp}戦で最後まで闘志を見せた選手は誰？🔥`,
+        `次こそ必ず勝つ！今日の${opp}戦で一番ファイトしていた選手に一票を！🦌`
+      );
+    } else {
+      candidates.push(
+        `絶対に負けられない${opp}戦！勝利へ導く今日のヒーローは誰だ！？🔥🦌`,
+        `鹿島の誇りを胸に${opp}を倒そう！一番活躍を期待する選手は誰？⚡`
+      );
+    }
+  }
+
+  const chosen = candidates[state.aiIndex % candidates.length];
+  state.aiIndex += 1;
+  state.messageLine2 = chosen;
+  document.getElementById('message-line2').value = chosen;
+  saveAutoData();
+  renderUI();
+  showToast('✨ メッセージを自動生成しました');
+}
+
+function buildPostText() {
+  const comp = (state.competition || '').trim();
+  const opp = (state.opponent || '').trim();
+  const dtStr = formatJapaneseDateTime(state.matchDate, state.matchTime);
+  const k = state.scoreKashima;
+  const o = state.scoreOpponent;
+  const hasScore = k !== '' && o !== '';
+  const venueLabel = state.venue === 'HOME' ? 'HOME' : 'AWAY';
+
+  // 1行目：大会・日時・対戦・スコア
+  let line1 = `🦌${comp ? comp + ' ' : ''}${dtStr ? dtStr + ' ' : ''}`;
+  if (opp) {
+    line1 += hasScore ? `vs ${opp}（${venueLabel}） ${k}-${o}` : `vs ${opp}（${venueLabel}）`;
+  } else if (hasScore) {
+    line1 += `鹿島 ${k}-${o}`;
+  }
+
+  // 2行目：意気込み・見どころメッセージ
+  const line2 = (state.messageLine2 || '').trim();
+
+  // アンケート選択肢一覧
+  const opts = state.pollOpts
+    .map((v, i) => v.trim() ? `${['①', '②', '③', '④'][i]} ${v.trim()}` : '')
+    .filter(Boolean);
+
+  return [
+    line1.trim(),
+    line2,
+    opts.length ? `\n📊 Xアンケート4択\n${opts.join('\n')}` : '',
+    `\n#鹿島アントラーズ #antlers`
+  ].filter(Boolean).join('\n');
+}
+
+function renderUI() {
+  // 大会ボタンハイライト
+  document.querySelectorAll('.comp-btn').forEach(btn => {
+    const active = state.competition.includes(btn.dataset.comp);
+    btn.className = `comp-btn px-2.5 py-1 rounded-lg text-xs font-bold border transition ${
+      active
+        ? 'bg-red-700 text-white border-amber-400 shadow'
+        : 'bg-slate-950 text-slate-300 border-slate-700 hover:border-slate-500'
+    }`;
+  });
+
+  // HOME / AWAY
+  const homeBtn = document.getElementById('venue-home-btn');
+  const awayBtn = document.getElementById('venue-away-btn');
+  homeBtn.className = `py-2 rounded-xl text-xs font-black border transition ${
+    state.venue === 'HOME'
+      ? 'bg-red-700 text-white border-amber-400 shadow'
+      : 'bg-slate-950 text-slate-400 border-slate-700'
+  }`;
+  awayBtn.className = `py-2 rounded-xl text-xs font-black border transition ${
+    state.venue === 'AWAY'
+      ? 'bg-amber-500 text-slate-950 border-amber-300 shadow'
+      : 'bg-slate-950 text-slate-400 border-slate-700'
+  }`;
+
+  // J1リスト
+  document.getElementById('j1-arrow').textContent = state.j1Open ? '▲' : '▼';
+  const j1List = document.getElementById('j1-club-list');
+  if (state.j1Open) {
+    j1List.classList.remove('hidden');
+    j1List.innerHTML = J1_OTHER_CLUBS.map(club => {
+      const encoded = encodeURIComponent(club);
+      const active = state.opponent === club;
+      return `
+        <button type="button" data-club-encoded="${encoded}" onclick="selectJ1Club(this)"
+          class="px-2.5 py-1.5 rounded-lg text-xs font-bold border text-left transition ${
+            active
+              ? 'bg-red-700 text-white border-amber-400'
+              : 'bg-slate-950 hover:bg-slate-800 text-slate-200 border-slate-800'
+          }">
+          ${club}
+        </button>
+      `;
+    }).join('');
+  } else {
+    j1List.classList.add('hidden');
+    j1List.innerHTML = '';
+  }
+
+  // 日時プレビュー
+  const dtPreview = formatJapaneseDateTime(state.matchDate, state.matchTime);
+  document.getElementById('formatted-datetime-preview').textContent = dtPreview || '未選択';
+
+  // ポスト文プレビュー
+  const text = buildPostText();
+  document.getElementById('post-preview').textContent = text;
+  document.getElementById('char-count').textContent = `${text.length} 文字`;
+
+  renderSavedPresets();
+}
+
+function saveCurrentPreset() {
+  onStateChange();
+  const opp = (state.opponent || '対戦相手未設定').trim();
+  const dt = formatJapaneseDateTime(state.matchDate, state.matchTime);
+  const label = `${dt ? dt + ' ' : ''}vs ${opp}`;
+  const now = new Date();
+  const savedAt = `${now.getMonth() + 1}/${now.getDate()} ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+
+  const entry = {
+    id: Date.now(),
+    label,
+    savedAt,
+    data: {
+      competition: state.competition,
+      venue: state.venue,
+      opponent: state.opponent,
+      matchDate: state.matchDate,
+      matchTime: state.matchTime,
+      scoreKashima: state.scoreKashima,
+      scoreOpponent: state.scoreOpponent,
+      pollOpts: [...state.pollOpts],
+      messageLine2: state.messageLine2,
+      aiTone: state.aiTone
     }
   };
 
-  var DEFAULT_PRE_OPTIONS = ['#40 鈴木優磨', '#9 レオ・セアラ', '#18 ヤン・マテウス', '#10 柴崎岳', 'その他（コメント欄で予想！）'];
+  state.presets = [entry, ...state.presets].slice(0, MAX_PRESETS);
+  try {
+    localStorage.setItem(PRESETS_KEY, JSON.stringify(state.presets));
+  } catch (e) {}
+  renderSavedPresets();
+  showToast('現在の内容を保存しました');
+}
 
-  var state = {
-    mode: 'pre',
-    comp: '明治安田J1リーグ',
-    round: '第15節',
-    ha: 'HOME',
-    opponent: '清水エスパルス',
-    preCatch: '【金J決戦！】',
-    preTiming: '明日',
-    preDatetime: '11/20（金）19:00',
-    preStadium: 'メルカリスタジアム',
-    preHype: 'ルヴァンカップ準決勝進出の勢いそのままに、金曜ナイターのホームゲームで確実に勝ち点3を掴み取りましょう！',
-    preSub: DEFAULT_PRE_SUB,
-    scoreKashima: '2',
-    scoreOpponent: '1',
-    resultLabel: '勝利',
-    pollType: 'mom',
-    body: POLL_PRESETS.mom.body,
-    outro: DEFAULT_POST_OUTRO,
-    options: DEFAULT_PRE_OPTIONS.slice(),
-    posFilter: 'ALL'
-  };
+function loadPreset(id) {
+  const found = state.presets.find(p => p.id === id);
+  if (!found) return;
+  Object.assign(state, JSON.parse(JSON.stringify(found.data)));
+  syncDOMFromState();
+  saveAutoData();
+  renderUI();
+  showToast(`「${found.label}」を読み込みました`);
+}
 
-  function saveState() {
-    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch (e) {}
+function deletePreset(id) {
+  state.presets = state.presets.filter(p => p.id !== id);
+  try {
+    localStorage.setItem(PRESETS_KEY, JSON.stringify(state.presets));
+  } catch (e) {}
+  renderSavedPresets();
+  showToast('保存データを削除しました');
+}
+
+function renderSavedPresets() {
+  const wrap = document.getElementById('saved-presets-list');
+  if (!wrap) return;
+  if (!state.presets.length) {
+    wrap.innerHTML = '<p class="text-xs text-slate-500">まだ保存データはありません。画面右上の「保存する」から最大5件まで保存できます。</p>';
+    return;
   }
+  wrap.innerHTML = state.presets.map(item => `
+    <div class="flex items-center justify-between gap-2 p-2.5 rounded-xl bg-slate-950 border border-slate-800">
+      <button type="button" onclick="loadPreset(${item.id})" class="text-left flex-1 min-w-0">
+        <div class="text-xs font-black text-white truncate">${item.label}</div>
+        <div class="text-[10px] text-slate-400 truncate">保存日時: ${item.savedAt} · ${item.data.messageLine2 || ''}</div>
+      </button>
+      <div class="flex items-center gap-1.5 shrink-0">
+        <button type="button" onclick="loadPreset(${item.id})" class="px-2.5 py-1 rounded-lg text-[11px] font-bold bg-slate-800 hover:bg-slate-700 text-amber-300 border border-slate-700">読込</button>
+        <button type="button" onclick="deletePreset(${item.id})" class="px-2.5 py-1 rounded-lg text-[11px] font-bold bg-slate-900 hover:bg-rose-950 text-slate-400 hover:text-rose-300 border border-slate-800">削除</button>
+      </div>
+    </div>
+  `).join('');
+}
 
-  function loadState() {
-    try {
-      var raw = localStorage.getItem(STORAGE_KEY);
-      if (!raw) return;
-      var p = JSON.parse(raw);
-      if (p.mode === 'pre' || p.mode === 'post') state.mode = p.mode;
-      if (p.comp !== undefined) state.comp = p.comp;
-      if (p.round !== undefined) state.round = p.round;
-      if (p.ha === 'HOME' || p.ha === 'AWAY') state.ha = p.ha;
-      if (p.opponent !== undefined) state.opponent = p.opponent;
-      if (p.preCatch !== undefined) state.preCatch = p.preCatch;
-      if (p.preTiming !== undefined) state.preTiming = p.preTiming;
-      if (p.preDatetime !== undefined) state.preDatetime = p.preDatetime;
-      if (p.preStadium !== undefined) state.preStadium = p.preStadium;
-      if (p.preHype !== undefined) state.preHype = p.preHype;
-      if (p.preSub !== undefined) state.preSub = p.preSub;
-      if (p.scoreKashima !== undefined) state.scoreKashima = String(p.scoreKashima);
-      if (p.scoreOpponent !== undefined) state.scoreOpponent = String(p.scoreOpponent);
-      if (p.resultLabel !== undefined) state.resultLabel = p.resultLabel;
-      if (p.pollType !== undefined) state.pollType = p.pollType;
-      if (p.body !== undefined) state.body = p.body;
-      if (p.outro !== undefined) state.outro = p.outro;
-      if (Array.isArray(p.options) && p.options.length === 5) state.options = p.options;
-    } catch (e) {}
+function resetForm() {
+  state.competition = '明治安田J1リーグ';
+  state.venue = 'HOME';
+  state.opponent = '';
+  state.matchDate = getTodayISO(0);
+  state.matchTime = '14:00';
+  state.scoreKashima = '';
+  state.scoreOpponent = '';
+  state.pollOpts = ['鈴木優磨', 'レオ・セアラ', '早川友基', 'チーム全員（リプ欄へ！）'];
+  state.messageLine2 = '';
+  syncDOMFromState();
+  saveAutoData();
+  renderUI();
+  showToast('入力内容をリセットしました');
+}
+
+function postToX() {
+  onStateChange();
+  const text = buildPostText();
+  window.open(`https://x.com/intent/tweet?text=${encodeURIComponent(text)}`, '_blank', 'noopener,noreferrer');
+}
+
+async function copyPostText() {
+  onStateChange();
+  try {
+    await navigator.clipboard.writeText(buildPostText());
+    showToast('ポスト文をコピーしました');
+  } catch (e) {
+    showToast('コピーに失敗しました');
   }
+}
 
-  function syncInputs() {
-    document.getElementById('comp-input').value = state.comp;
-    document.getElementById('round-input').value = state.round;
-    document.getElementById('opponent-input').value = state.opponent;
-    document.getElementById('pre-catch-input').value = state.preCatch;
-    document.getElementById('pre-datetime-input').value = state.preDatetime;
-    document.getElementById('pre-stadium-input').value = state.preStadium;
-    document.getElementById('pre-hype-input').value = state.preHype;
-    document.getElementById('pre-sub-input').value = state.preSub;
-    document.getElementById('score-kashima').value = state.scoreKashima;
-    document.getElementById('score-opponent').value = state.scoreOpponent;
-    document.getElementById('body-text').value = state.body;
-    document.getElementById('outro-text').value = state.outro;
-  }
+let toastTimer = null;
+function showToast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.remove('hidden');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.add('hidden'), 2300);
+}
 
-  function buildPrePostBody() {
-    var timing = state.preTiming || '明日';
-    var haLabel = (state.ha === 'AWAY') ? 'アウェイで' : 'ホームで';
-    var opp = state.opponent || '対戦相手';
-    var catchTag = (state.preCatch || '').trim();
-    var titleLine = '【' + catchTag + timing + 'は' + haLabel + opp + '戦！勝利の立役者（MOM）を大予想！】';
-
-    var dt = (state.preDatetime || '').trim();
-    var stad = (state.preStadium || '').trim();
-    var compRound = [state.comp, state.round].filter(Boolean).join('');
-    var line1 = timing + (dt ? dt + 'は、' : 'は、') + (stad ? stad + 'で' : '') + (compRound ? compRound + '・' : '') + opp + '戦！⚽️🔥';
-    var line2 = (state.preHype || '').trim();
-    var subLine = (state.preSub || '').trim() || DEFAULT_PRE_SUB;
-    var askLine = timing + 'の' + opp + '戦で最も輝き、勝利に導くマン・オブ・ザ・マッチ（MOM）は誰になると思いますか？皆さんの予想をアンケートで教えてください！鹿島魂！';
-    var tags = '#鹿島アントラーズ #antlers #鹿syouチャンネル';
-
-    return [titleLine, '', line1, line2, '', subLine, '', askLine, '', tags].filter(function (v, idx, arr) {
-      return !(v === '' && arr[idx - 1] === '');
-    }).join('\n');
-  }
-
-  function buildPostMatchBody() {
-    var parts = [];
-    if (state.comp) parts.push(state.comp);
-    if (state.round) parts.push(state.round);
-    if (state.opponent) parts.push('vs ' + state.opponent);
-    var prefix = parts.join(' ');
-    var haTag = state.ha ? '(' + state.ha + ')' : '';
-    var scorePart = (state.scoreKashima !== '' && state.scoreOpponent !== '')
-      ? (state.scoreKashima + '-' + state.scoreOpponent)
-      : '';
-    var resPart = [scorePart, state.resultLabel].filter(Boolean).join(' ');
-    var titleLine = ('【' + prefix + ' ' + haTag + '｜' + resPart + '】').replace(/\s+/g, ' ');
-
-    var bodyText = (state.body || '').trim();
-    var outroText = (state.outro || '').trim() || DEFAULT_POST_OUTRO;
-    var tags = '#鹿島アントラーズ #antlers #鹿syouチャンネル';
-    return [titleLine, '', bodyText, '', outroText, '', tags].join('\n');
-  }
-
-  function buildFullPostBody() {
-    return (state.mode === 'pre') ? buildPrePostBody() : buildPostMatchBody();
-  }
-
-  function renderModeVisibility() {
-    var preSec = document.getElementById('pre-section');
-    var postSec = document.getElementById('post-section');
-    if (state.mode === 'pre') {
-      preSec.classList.remove('hidden');
-      postSec.classList.add('hidden');
-    } else {
-      preSec.classList.add('hidden');
-      postSec.classList.remove('hidden');
-    }
-  }
-
-  function renderButtons() {
-    document.querySelectorAll('[data-action="mode"]').forEach(function (btn) {
-      var v = btn.getAttribute('data-val');
-      if (v === state.mode) {
-        btn.className = (v === 'pre') ? 'active-blue' : 'active-red';
-      } else {
-        btn.className = '';
-      }
-    });
-    document.querySelectorAll('[data-action="comp"]').forEach(function (btn) {
-      btn.className = (btn.getAttribute('data-val') === state.comp) ? 'active-red' : '';
-    });
-    document.querySelectorAll('[data-action="ha"]').forEach(function (btn) {
-      var v = btn.getAttribute('data-val');
-      if (v === state.ha) {
-        btn.className = (v === 'HOME') ? 'active-red' : 'active-gold';
-      } else {
-        btn.className = '';
-      }
-    });
-    document.querySelectorAll('[data-action="catch"]').forEach(function (btn) {
-      btn.className = (btn.getAttribute('data-val') === state.preCatch) ? 'active-blue' : '';
-    });
-    document.querySelectorAll('[data-action="timing"]').forEach(function (btn) {
-      btn.className = (btn.getAttribute('data-val') === state.preTiming) ? 'active-gold' : '';
-    });
-    document.querySelectorAll('[data-action="stadium"]').forEach(function (btn) {
-      btn.className = (btn.getAttribute('data-val') === state.preStadium) ? 'active-blue' : '';
-    });
-    document.querySelectorAll('[data-action="result"]').forEach(function (btn) {
-      btn.className = (btn.getAttribute('data-val') === state.resultLabel) ? 'active-green' : '';
-    });
-    document.querySelectorAll('[data-action="poll-type"]').forEach(function (btn) {
-      btn.className = (btn.getAttribute('data-val') === state.pollType) ? 'active-gold' : '';
-    });
-  }
-
-  function renderOptions() {
-    var container = document.getElementById('options-container');
-    container.innerHTML = '';
-    state.options.forEach(function (opt, idx) {
-      var row = document.createElement('div');
-      row.className = 'flex-row';
-
-      var num = document.createElement('span');
-      num.className = 'opt-num';
-      num.textContent = String(idx + 1);
-
-      var inp = document.createElement('input');
-      inp.type = 'text';
-      inp.value = opt;
-      inp.placeholder = '選択肢 ' + (idx + 1) + '（空欄なら省略）';
-      inp.setAttribute('data-opt-idx', String(idx));
-
-      var delBtn = document.createElement('button');
-      delBtn.type = 'button';
-      delBtn.textContent = '消去';
-      delBtn.style.flexShrink = '0';
-      delBtn.setAttribute('data-action', 'clear-opt');
-      delBtn.setAttribute('data-idx', String(idx));
-
-      row.appendChild(num);
-      row.appendChild(inp);
-      row.appendChild(delBtn);
-      container.appendChild(row);
-    });
-  }
-
-  function renderPreview() {
-    document.getElementById('preview-body').textContent = buildFullPostBody();
-    var copyContainer = document.getElementById('preview-options-copy');
-    copyContainer.innerHTML = '';
-    var activeOptions = state.options.map(function (v) { return v.trim(); }).filter(Boolean);
-
-    if (activeOptions.length === 0) {
-      var emptyMsg = document.createElement('div');
-      emptyMsg.style.fontSize = '12px';
-      emptyMsg.style.color = '#94a3b8';
-      emptyMsg.textContent = '選択肢が未入力です。';
-      copyContainer.appendChild(emptyMsg);
-      return;
-    }
-
-    activeOptions.forEach(function (opt, idx) {
-      var btn = document.createElement('button');
-      btn.type = 'button';
-      btn.className = 'copy-opt-btn';
-      btn.setAttribute('data-action', 'copy-opt');
-      btn.setAttribute('data-opt-text', opt);
-      btn.setAttribute('data-opt-num', String(idx + 1));
-
-      var left = document.createElement('span');
-      left.style.display = 'flex';
-      left.style.alignItems = 'center';
-      left.style.gap = '8px';
-
-      var badge = document.createElement('span');
-      badge.className = 'badge-red';
-      badge.textContent = '項目' + (idx + 1);
-
-      var label = document.createElement('span');
-      label.textContent = opt;
-
-      var right = document.createElement('span');
-      right.style.color = '#fcd34d';
-      right.style.fontSize = '11px';
-      right.style.flexShrink = '0';
-      right.textContent = 'コピー';
-
-      left.appendChild(badge);
-      left.appendChild(label);
-      btn.appendChild(left);
-      btn.appendChild(right);
-      copyContainer.appendChild(btn);
-    });
-  }
-
-  function renderPlayerList() {
-    document.querySelectorAll('[data-action="pos-filter"]').forEach(function (btn) {
-      btn.className = (btn.getAttribute('data-val') === state.posFilter) ? 'active-gold' : '';
-    });
-
-    var usedCount = state.options.filter(function (v) { return v.trim(); }).length;
-    document.getElementById('modal-slot-count').textContent = '現在 ' + usedCount + ' / 5 項目設定中';
-
-    var q = (document.getElementById('player-search').value || '').trim().toLowerCase();
-    var list = document.getElementById('player-list');
-    list.innerHTML = '';
-
-    PLAYERS.filter(function (p) {
-      if (state.posFilter !== 'ALL' && p.pos !== state.posFilter) return false;
-      if (!q) return true;
-      return String(p.number).indexOf(q) !== -1 || p.name.toLowerCase().indexOf(q) !== -1;
-    }).forEach(function (p) {
-      var label = '#' + p.number + ' ' + p.name;
-      var selected = state.options.indexOf(label) !== -1;
-
-      var btn = document.createElement('button');
-      btn.type = 'button';
-      btn.className = 'player-item' + (selected ? ' selected' : '');
-      btn.setAttribute('data-action', 'toggle-player');
-      btn.setAttribute('data-player-label', label);
-
-      var left = document.createElement('span');
-      left.style.display = 'flex';
-      left.style.alignItems = 'center';
-      left.style.gap = '8px';
-
-      var num = document.createElement('span');
-      num.className = 'num-badge';
-      num.textContent = String(p.number);
-
-      var pos = document.createElement('span');
-      pos.style.fontSize = '10px';
-      pos.style.padding = '2px 5px';
-      pos.style.borderRadius = '5px';
-      pos.style.background = '#1e293b';
-      pos.style.color = '#cbd5e1';
-      pos.textContent = p.pos;
-
-      var name = document.createElement('span');
-      name.textContent = p.name;
-
-      var right = document.createElement('span');
-      right.style.fontSize = '11px';
-      right.style.color = selected ? '#fcd34d' : '#64748b';
-      right.textContent = selected ? '選択中 ✓' : '追加';
-
-      left.appendChild(num);
-      left.appendChild(pos);
-      left.appendChild(name);
-      btn.appendChild(left);
-      btn.appendChild(right);
-      list.appendChild(btn);
-    });
-  }
-
-  function renderAll() {
-    renderModeVisibility();
-    renderButtons();
-    renderOptions();
-    renderPreview();
-  }
-
-  var toastTimer = null;
-  function showToast(msg) {
-    var el = document.getElementById('toast');
-    el.textContent = msg;
-    el.classList.add('show');
-    clearTimeout(toastTimer);
-    toastTimer = setTimeout(function () { el.classList.remove('show'); }, 2200);
-  }
-
-  function fallbackCopy(text) {
-    var ta = document.createElement('textarea');
-    ta.value = text;
-    ta.style.position = 'fixed';
-    ta.style.opacity = '0';
-    document.body.appendChild(ta);
-    ta.focus();
-    ta.select();
-    try { document.execCommand('copy'); } catch (e) {}
-    document.body.removeChild(ta);
-  }
-
-  function copyText(text, msg) {
-    if (navigator.clipboard && navigator.clipboard.writeText) {
-      navigator.clipboard.writeText(text).then(function () {
-        showToast(msg);
-      }).catch(function () {
-        fallbackCopy(text);
-        showToast(msg);
-      });
-    } else {
-      fallbackCopy(text);
-      showToast(msg);
-    }
-  }
-
-  document.addEventListener('click', function (e) {
-    var btn = e.target.closest('button');
-    if (!btn) return;
-    var action = btn.getAttribute('data-action');
-    if (!action) return;
-
-    if (action === 'mode') {
-      var m = btn.getAttribute('data-val');
-      state.mode = m;
-      if (m === 'pre') {
-        state.options = DEFAULT_PRE_OPTIONS.slice();
-      } else {
-        state.options = POLL_PRESETS[state.pollType].options.slice();
-      }
-      saveState();
-      renderAll();
-    } else if (action === 'reset') {
-      state.comp = '明治安田J1リーグ';
-      state.round = '第15節';
-      state.ha = 'HOME';
-      state.opponent = '清水エスパルス';
-      state.preCatch = '【金J決戦！】';
-      state.preTiming = '明日';
-      state.preDatetime = '11/20（金）19:00';
-      state.preStadium = 'メルカリスタジアム';
-      state.preHype = 'ルヴァンカップ準決勝進出の勢いそのままに、金曜ナイターのホームゲームで確実に勝ち点3を掴み取りましょう！';
-      state.preSub = DEFAULT_PRE_SUB;
-      state.scoreKashima = '2';
-      state.scoreOpponent = '1';
-      state.resultLabel = '勝利';
-      state.pollType = 'mom';
-      state.body = POLL_PRESETS.mom.body;
-      state.outro = DEFAULT_POST_OUTRO;
-      state.options = (state.mode === 'pre') ? DEFAULT_PRE_OPTIONS.slice() : POLL_PRESETS.mom.options.slice();
-      syncInputs();
-      saveState();
-      renderAll();
-      showToast('初期状態にリセットしました');
-    } else if (action === 'comp') {
-      state.comp = btn.getAttribute('data-val');
-      document.getElementById('comp-input').value = state.comp;
-      saveState();
-      renderAll();
-    } else if (action === 'step-round') {
-      var cur = document.getElementById('round-input').value || '第1節';
-      var match = cur.match(/(\d+)/);
-      state.round = match ? cur.replace(/\d+/, String(Math.max(1, parseInt(match[1], 10) + 1))) : '第1節';
-      document.getElementById('round-input').value = state.round;
-      saveState();
-      renderAll();
-    } else if (action === 'ha') {
-      state.ha = btn.getAttribute('data-val');
-      if (state.ha === 'AWAY' && state.preStadium === 'メルカリスタジアム') {
-        state.preStadium = '敵地・アウェイ';
-        document.getElementById('pre-stadium-input').value = state.preStadium;
-      } else if (state.ha === 'HOME' && state.preStadium === '敵地・アウェイ') {
-        state.preStadium = 'メルカリスタジアム';
-        document.getElementById('pre-stadium-input').value = state.preStadium;
-      }
-      saveState();
-      renderAll();
-    } else if (action === 'catch') {
-      state.preCatch = btn.getAttribute('data-val');
-      document.getElementById('pre-catch-input').value = state.preCatch;
-      saveState();
-      renderAll();
-    } else if (action === 'timing') {
-      state.preTiming = btn.getAttribute('data-val');
-      saveState();
-      renderAll();
-    } else if (action === 'stadium') {
-      state.preStadium = btn.getAttribute('data-val');
-      document.getElementById('pre-stadium-input').value = state.preStadium;
-      saveState();
-      renderAll();
-    } else if (action === 'result') {
-      state.resultLabel = btn.getAttribute('data-val');
-      saveState();
-      renderAll();
-    } else if (action === 'poll-type') {
-      var t = btn.getAttribute('data-val');
-      state.pollType = t;
-      if (POLL_PRESETS[t]) {
-        state.body = POLL_PRESETS[t].body;
-        state.options = POLL_PRESETS[t].options.slice();
-        document.getElementById('body-text').value = state.body;
-      }
-      saveState();
-      renderAll();
-    } else if (action === 'clear-opt') {
-      var idx = parseInt(btn.getAttribute('data-idx'), 10);
-      state.options[idx] = '';
-      saveState();
-      renderOptions();
-      renderPreview();
-    } else if (action === 'quick-opt') {
-      var val = btn.getAttribute('data-val');
-      if (state.options.indexOf(val) !== -1) {
-        showToast('すでに選択肢に入っています');
-        return;
-      }
-      var emptyIdx = state.options.findIndex(function (v) { return !v.trim(); });
-      if (emptyIdx !== -1) state.options[emptyIdx] = val;
-      else state.options[4] = val;
-      saveState();
-      renderOptions();
-      renderPreview();
-      showToast('「' + val + '」を追加しました');
-    } else if (action === 'open-modal') {
-      renderPlayerList();
-      document.getElementById('player-modal').classList.add('open');
-    } else if (action === 'close-modal') {
-      document.getElementById('player-modal').classList.remove('open');
-    } else if (action === 'pos-filter') {
-      state.posFilter = btn.getAttribute('data-val');
-      renderPlayerList();
-    } else if (action === 'toggle-player') {
-      var label = btn.getAttribute('data-player-label');
-      var existIdx = state.options.indexOf(label);
-      if (existIdx !== -1) {
-        state.options[existIdx] = '';
-        showToast(label + ' を外しました');
-      } else {
-        var slot = state.options.findIndex(function (v) { return !v.trim(); });
-        if (slot === -1) {
-          showToast('選択肢は最大5個までです');
-          return;
-        }
-        state.options[slot] = label;
-        showToast(label + ' を追加しました');
-      }
-      saveState();
-      renderOptions();
-      renderPlayerList();
-      renderPreview();
-    } else if (action === 'copy-body') {
-      copyText(buildFullPostBody(), 'タイトル＆本文をコピーしました！');
-    } else if (action === 'copy-opt') {
-      copyText(btn.getAttribute('data-opt-text'), '選択肢' + btn.getAttribute('data-opt-num') + 'をコピーしました');
-    } else if (action === 'copy-all') {
-      var active = state.options.map(function (v) { return v.trim(); }).filter(Boolean);
-      var lines = active.map(function (o, i) { return (i + 1) + '. ' + o; }).join('\n');
-      copyText(buildFullPostBody() + '\n\n【アンケート項目】\n' + lines, '本文と全選択肢をまとめてコピーしました！');
-    }
-  });
-
-  document.addEventListener('input', function (e) {
-    var el = e.target;
-    if (el.id === 'comp-input') {
-      state.comp = el.value.trim();
-      renderButtons();
-    } else if (el.id === 'round-input') {
-      state.round = el.value.trim();
-    } else if (el.id === 'opponent-input') {
-      state.opponent = el.value.trim();
-    } else if (el.id === 'pre-catch-input') {
-      state.preCatch = el.value;
-      renderButtons();
-    } else if (el.id === 'pre-datetime-input') {
-      state.preDatetime = el.value;
-    } else if (el.id === 'pre-stadium-input') {
-      state.preStadium = el.value;
-      renderButtons();
-    } else if (el.id === 'pre-hype-input') {
-      state.preHype = el.value;
-    } else if (el.id === 'pre-sub-input') {
-      state.preSub = el.value;
-    } else if (el.id === 'score-kashima' || el.id === 'score-opponent') {
-      state.scoreKashima = document.getElementById('score-kashima').value;
-      state.scoreOpponent = document.getElementById('score-opponent').value;
-      var k = parseInt(state.scoreKashima, 10);
-      var o = parseInt(state.scoreOpponent, 10);
-      if (!isNaN(k) && !isNaN(o)) {
-        if (k > o) state.resultLabel = '勝利';
-        else if (k === o) state.resultLabel = '引き分け';
-        else state.resultLabel = '敗戦';
-        renderButtons();
-      }
-    } else if (el.id === 'body-text') {
-      state.body = el.value;
-    } else if (el.id === 'outro-text') {
-      state.outro = el.value;
-    } else if (el.hasAttribute('data-opt-idx')) {
-      var i = parseInt(el.getAttribute('data-opt-idx'), 10);
-      state.options[i] = el.value;
-    } else if (el.id === 'player-search') {
-      renderPlayerList();
-      return;
-    }
-    saveState();
-    renderPreview();
-  });
-
-  document.getElementById('opponent-select').addEventListener('change', function (e) {
-    if (e.target.value) {
-      state.opponent = e.target.value;
-      document.getElementById('opponent-input').value = state.opponent;
-      saveState();
-      renderPreview();
-    }
-  });
-
-  loadState();
-  syncInputs();
-  renderAll();
-})();
+loadSavedData();
+syncDOMFromState();
+renderUI();
 </script>
 </body>
 </html>
