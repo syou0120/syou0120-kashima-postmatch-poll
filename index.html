@@ -1,0 +1,886 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>鹿島アントラーズ 試合後アンケート作成ツール</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@500;700;800;900&family=Noto+Sans+JP:wght@400;500;700;800;900&display=swap" rel="stylesheet">
+<style>
+  body {
+    font-family: 'Noto Sans JP', 'Inter', sans-serif;
+    background-color: #0b1120;
+    color: #f8fafc;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .font-num {
+    font-family: 'Inter', 'Noto Sans JP', sans-serif;
+    font-variant-numeric: tabular-nums;
+  }
+  .antlers-header {
+    background: linear-gradient(90deg, #991b1b 0%, #7f1d1d 55%, #450a0a 100%);
+  }
+  .antlers-red {
+    background: linear-gradient(135deg, #b91c1c 0%, #7f1d1d 100%);
+  }
+</style>
+</head>
+<body class="min-h-screen pb-20">
+
+  <!-- ヘッダー -->
+  <header class="antlers-header border-b border-amber-400/30 sticky top-0 z-30">
+    <div class="max-w-2xl mx-auto px-3.5 py-2.5 flex items-center justify-between gap-2">
+      <div class="min-w-0">
+        <h1 class="text-sm sm:text-base font-black tracking-tight text-white truncate">試合後アンケート作成ツール</h1>
+        <p class="text-[10px] text-amber-200/85 truncate">鹿syouチャンネル用 · スマホ即投稿ジェネレーター</p>
+      </div>
+      <button type="button" onclick="resetForm()"
+        class="px-2.5 py-1.5 rounded-lg text-[11px] font-bold bg-slate-950/75 hover:bg-slate-900 text-slate-100 border border-white/20 shrink-0 transition">
+        リセット
+      </button>
+    </div>
+  </header>
+
+  <main class="max-w-2xl mx-auto px-3.5 pt-3.5 space-y-3.5">
+
+    <!-- ① 試合情報（タイトル自動生成用） -->
+    <section class="bg-slate-900 border border-slate-800 rounded-2xl p-3.5 space-y-3">
+      <div class="flex items-center gap-2">
+        <span class="w-1.5 h-4 bg-red-600 rounded-full"></span>
+        <h2 class="text-xs sm:text-sm font-black text-white">① 試合情報（タイトルに自動反映）</h2>
+      </div>
+
+      <!-- 大会名 -->
+      <div class="space-y-1.5">
+        <label class="block text-[11px] font-bold text-slate-400">大会名</label>
+        <div class="flex flex-wrap gap-1.5" id="comp-presets">
+          <button type="button" onclick="selectComp('明治安田J1リーグ')" class="comp-btn px-2.5 py-1.5 rounded-lg text-xs font-bold border transition">明治安田J1リーグ</button>
+          <button type="button" onclick="selectComp('JリーグYBCルヴァンカップ')" class="comp-btn px-2.5 py-1.5 rounded-lg text-xs font-bold border transition">ルヴァンカップ</button>
+          <button type="button" onclick="selectComp('天皇杯')" class="comp-btn px-2.5 py-1.5 rounded-lg text-xs font-bold border transition">天皇杯</button>
+          <button type="button" onclick="selectComp('ACL')" class="comp-btn px-2.5 py-1.5 rounded-lg text-xs font-bold border transition">ACL</button>
+        </div>
+        <input id="comp-input" type="text" value="明治安田J1リーグ" oninput="updateAll()"
+          placeholder="大会名を直接編集も可"
+          class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-xs font-bold text-white focus:outline-none focus:border-amber-400">
+      </div>
+
+      <!-- 試合名（第〇節など） & H/A -->
+      <div class="grid grid-cols-2 gap-2.5">
+        <div class="space-y-1">
+          <label class="block text-[11px] font-bold text-slate-400">試合名（節・ラウンド）</label>
+          <div class="flex items-center gap-1">
+            <input id="round-input" type="text" value="第15節" oninput="updateAll()"
+              placeholder="例: 第15節 / 準決勝"
+              class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-xs font-bold text-white focus:outline-none focus:border-amber-400">
+            <button type="button" onclick="stepRound(1)" class="px-2.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-black text-amber-300 border border-slate-700 shrink-0">+1</button>
+          </div>
+        </div>
+
+        <div class="space-y-1">
+          <label class="block text-[11px] font-bold text-slate-400">HOME / AWAY</label>
+          <div class="grid grid-cols-2 gap-1.5">
+            <button type="button" id="ha-home" onclick="setHA('HOME')"
+              class="py-2 rounded-xl text-xs font-black border transition">HOME</button>
+            <button type="button" id="ha-away" onclick="setHA('AWAY')"
+              class="py-2 rounded-xl text-xs font-black border transition">AWAY</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 対戦相手 -->
+      <div class="space-y-1">
+        <label class="block text-[11px] font-bold text-slate-400">対戦相手</label>
+        <div class="grid grid-cols-2 gap-2">
+          <select id="opponent-select" onchange="onOpponentSelect()"
+            class="px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-xs font-bold text-white focus:outline-none focus:border-amber-400">
+            <option value="">一覧から選択...</option>
+            <option value="浦和レッズ">浦和レッズ</option>
+            <option value="FC東京">FC東京</option>
+            <option value="東京ヴェルディ">東京ヴェルディ</option>
+            <option value="FC町田ゼルビア">FC町田ゼルビア</option>
+            <option value="川崎フロンターレ">川崎フロンターレ</option>
+            <option value="横浜F・マリノス">横浜F・マリノス</option>
+            <option value="横浜FC">横浜FC</option>
+            <option value="湘南ベルマーレ">湘南ベルマーレ</option>
+            <option value="柏レイソル">柏レイソル</option>
+            <option value="ジェフユナイテッド千葉">ジェフユナイテッド千葉</option>
+            <option value="水戸ホーリーホック">水戸ホーリーホック</option>
+            <option value="アルビレックス新潟">アルビレックス新潟</option>
+            <option value="清水エスパルス">清水エスパルス</option>
+            <option value="名古屋グランパス">名古屋グランパス</option>
+            <option value="京都サンガF.C.">京都サンガF.C.</option>
+            <option value="ガンバ大阪">ガンバ大阪</option>
+            <option value="セレッソ大阪">セレッソ大阪</option>
+            <option value="ヴィッセル神戸">ヴィッセル神戸</option>
+            <option value="ファジアーノ岡山">ファジアーノ岡山</option>
+            <option value="サンフレッチェ広島">サンフレッチェ広島</option>
+            <option value="アビスパ福岡">アビスパ福岡</option>
+          </select>
+          <input id="opponent-input" type="text" value="浦和レッズ" oninput="updateAll()"
+            placeholder="対戦相手名"
+            class="px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-xs font-bold text-white focus:outline-none focus:border-amber-400">
+        </div>
+      </div>
+
+      <!-- 試合結果（スコア＆勝敗） -->
+      <div class="space-y-1.5">
+        <label class="block text-[11px] font-bold text-slate-400">試合結果（左: 鹿島 ／ 右: 相手）</label>
+        <div class="flex items-center gap-2">
+          <div class="flex items-center gap-1.5 bg-slate-950 border border-slate-700 rounded-xl px-2.5 py-1.5">
+            <span class="text-[11px] font-black text-red-400">鹿島</span>
+            <input id="score-kashima" type="number" min="0" max="20" value="2" oninput="onScoreChange()"
+              class="w-11 text-center font-num text-sm font-black bg-slate-900 border border-slate-700 rounded-lg py-1 text-white focus:outline-none focus:border-amber-400">
+            <span class="text-xs font-black text-slate-400">-</span>
+            <input id="score-opponent" type="number" min="0" max="20" value="1" oninput="onScoreChange()"
+              class="w-11 text-center font-num text-sm font-black bg-slate-900 border border-slate-700 rounded-lg py-1 text-white focus:outline-none focus:border-amber-400">
+            <span class="text-[11px] font-bold text-slate-400">相手</span>
+          </div>
+
+          <div class="grid grid-cols-3 gap-1 flex-1">
+            <button type="button" data-res="勝利" onclick="setResultLabel('勝利')" class="res-btn py-2 rounded-xl text-xs font-black border transition">勝利</button>
+            <button type="button" data-res="引き分け" onclick="setResultLabel('引き分け')" class="res-btn py-2 rounded-xl text-xs font-black border transition">引分</button>
+            <button type="button" data-res="敗戦" onclick="setResultLabel('敗戦')" class="res-btn py-2 rounded-xl text-xs font-black border transition">敗戦</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ② アンケートテーマ＆本文 -->
+    <section class="bg-slate-900 border border-slate-800 rounded-2xl p-3.5 space-y-3">
+      <div class="flex items-center justify-between gap-2">
+        <div class="flex items-center gap-2">
+          <span class="w-1.5 h-4 bg-amber-400 rounded-full"></span>
+          <h2 class="text-xs sm:text-sm font-black text-white">② アンケート種類・本文</h2>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-1.5">
+        <button type="button" data-type="mom" onclick="applyPollType('mom')" class="type-btn py-2 px-2 rounded-xl text-xs font-black border transition">今日のMOM</button>
+        <button type="button" data-type="rating" onclick="applyPollType('rating')" class="type-btn py-2 px-2 rounded-xl text-xs font-black border transition">試合の評価</button>
+        <button type="button" data-type="point" onclick="applyPollType('point')" class="type-btn py-2 px-2 rounded-xl text-xs font-black border transition">勝因・ポイント</button>
+        <button type="button" data-type="custom" onclick="applyPollType('custom')" class="type-btn py-2 px-2 rounded-xl text-xs font-black border transition">自由入力</button>
+      </div>
+
+      <div class="space-y-1">
+        <label class="block text-[11px] font-bold text-slate-400">質問文・本文メッセージ</label>
+        <textarea id="body-text" rows="3" oninput="updatePreview()"
+          class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-xs leading-relaxed text-white focus:outline-none focus:border-amber-400"></textarea>
+      </div>
+
+      <div class="space-y-1">
+        <div class="flex items-center justify-between">
+          <label class="block text-[11px] font-bold text-amber-300">本文末尾の結び（次の試合案内・チャンネル登録）</label>
+          <button type="button" onclick="resetOutroText()" class="text-[10px] text-slate-400 hover:text-amber-300 underline">
+            定型文に戻す
+          </button>
+        </div>
+        <textarea id="outro-text" rows="2" oninput="updatePreview()"
+          class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-xs leading-relaxed text-amber-100 focus:outline-none focus:border-amber-400"></textarea>
+      </div>
+    </section>
+
+    <!-- ③ アンケート選択肢（最大5つ） -->
+    <section class="bg-slate-900 border border-slate-800 rounded-2xl p-3.5 space-y-3">
+      <div class="flex items-center justify-between gap-2">
+        <div class="flex items-center gap-2">
+          <span class="w-1.5 h-4 bg-emerald-500 rounded-full"></span>
+          <h2 class="text-xs sm:text-sm font-black text-white">③ アンケート選択肢（最大5個）</h2>
+        </div>
+        <button type="button" onclick="openPlayerModal()"
+          class="px-3 py-1.5 rounded-xl text-xs font-black bg-amber-400 hover:bg-amber-300 text-slate-950 shadow transition">
+          ＋ 選手から選ぶ
+        </button>
+      </div>
+
+      <!-- 選択肢リスト -->
+      <div id="options-container" class="space-y-2"></div>
+
+      <!-- クイック追加チップ -->
+      <div class="pt-1 border-t border-slate-800/80 space-y-1.5">
+        <p class="text-[10px] font-bold text-slate-400">ワンタップ追加（空き枠・末尾に入ります）:</p>
+        <div class="flex flex-wrap gap-1.5">
+          <button type="button" onclick="addQuickOption('チーム全員がMOM！')" class="px-2.5 py-1 rounded-lg bg-slate-950 hover:bg-slate-800 border border-slate-700 text-[11px] font-bold text-amber-200">+ チーム全員がMOM！</button>
+          <button type="button" onclick="addQuickOption('その他（コメント欄へ！）')" class="px-2.5 py-1 rounded-lg bg-slate-950 hover:bg-slate-800 border border-slate-700 text-[11px] font-bold text-slate-200">+ その他（コメント欄へ！）</button>
+          <button type="button" onclick="addQuickOption('現地・DAZN応援のサポーター')" class="px-2.5 py-1 rounded-lg bg-slate-950 hover:bg-slate-800 border border-slate-700 text-[11px] font-bold text-slate-200">+ サポーター</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ④ 出力プレビュー＆ワンタップコピー -->
+    <section class="bg-slate-900 border-2 border-amber-400/50 rounded-2xl p-3.5 space-y-3 shadow-xl">
+      <div class="flex items-center justify-between">
+        <h2 class="text-xs sm:text-sm font-black text-amber-300">④ YouTube投稿用テキスト出力</h2>
+        <span class="text-[10px] text-slate-400">コピペしてそのまま投稿OK</span>
+      </div>
+
+      <!-- タイトル＋本文プレビュー -->
+      <div class="space-y-1.5">
+        <div class="flex items-center justify-between">
+          <span class="text-[11px] font-bold text-slate-300">投稿タイトル＆本文</span>
+          <button type="button" onclick="copyPostBody()"
+            class="px-3.5 py-1.5 rounded-xl text-xs font-black bg-amber-500 hover:bg-amber-400 text-slate-950 shadow transition">
+            本文をコピー
+          </button>
+        </div>
+        <pre id="preview-body" class="whitespace-pre-wrap break-words p-3 rounded-xl bg-slate-950 border border-slate-700 text-xs leading-relaxed text-white font-sans"></pre>
+      </div>
+
+      <!-- 選択肢個別コピー（YouTubeの選択肢欄に1つずつ貼る用） -->
+      <div class="space-y-1.5 pt-2 border-t border-slate-800">
+        <div class="flex items-center justify-between">
+          <span class="text-[11px] font-bold text-slate-300">選択肢（1つずつタップでコピー）</span>
+          <button type="button" onclick="copyAllText()"
+            class="px-2.5 py-1 rounded-lg text-[11px] font-bold bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition">
+            全部まとめてコピー
+          </button>
+        </div>
+        <div id="preview-options-copy" class="space-y-1.5"></div>
+      </div>
+
+      <!-- YouTube開くボタン -->
+      <a href="https://www.youtube.com/@syou0120/community" target="_blank" rel="noopener noreferrer"
+        class="block w-full py-3 rounded-xl text-center text-xs font-black bg-red-700 hover:bg-red-600 text-white border border-amber-400/40 shadow transition">
+        YouTubeの投稿画面を開く（@syou0120）
+      </a>
+    </section>
+
+  </main>
+
+  <!-- フッター -->
+  <footer class="max-w-2xl mx-auto px-4 mt-8 pt-4 border-t border-slate-800/80 text-center space-y-1 text-[11px] text-slate-400">
+    <div>
+      <a href="https://www.youtube.com/@syou0120" target="_blank" rel="noopener noreferrer"
+        class="text-amber-300 hover:text-amber-200 underline underline-offset-2 font-bold">
+        Youtubeの鹿syouチャンネル
+      </a>
+    </div>
+    <div class="text-slate-500">Created by @syou0120</div>
+  </footer>
+
+  <!-- 選手選択モーダル -->
+  <div id="player-modal" class="fixed inset-0 z-50 hidden items-end sm:items-center justify-center bg-black/80 p-0 sm:p-4">
+    <div class="bg-slate-900 border-t sm:border border-slate-700 rounded-t-3xl sm:rounded-2xl w-full max-w-lg p-4 space-y-3 max-h-[85vh] flex flex-col">
+      <div class="flex items-center justify-between shrink-0">
+        <div>
+          <h3 class="text-sm font-black text-white">選択肢に入れる選手をタップ</h3>
+          <p id="modal-slot-count" class="text-[11px] text-amber-300 font-bold">現在 0 / 5 項目設定中</p>
+        </div>
+        <button type="button" onclick="closePlayerModal()" class="text-slate-400 hover:text-white text-lg font-bold px-2.5 py-1">✕</button>
+      </div>
+
+      <div class="flex items-center gap-1.5 flex-wrap shrink-0">
+        <button type="button" onclick="setPosFilter('ALL')" data-pos="ALL" class="pos-btn px-2.5 py-1 rounded-lg text-xs font-bold border transition">ALL</button>
+        <button type="button" onclick="setPosFilter('GK')" data-pos="GK" class="pos-btn px-2.5 py-1 rounded-lg text-xs font-bold border transition">GK</button>
+        <button type="button" onclick="setPosFilter('DF')" data-pos="DF" class="pos-btn px-2.5 py-1 rounded-lg text-xs font-bold border transition">DF</button>
+        <button type="button" onclick="setPosFilter('MF')" data-pos="MF" class="pos-btn px-2.5 py-1 rounded-lg text-xs font-bold border transition">MF</button>
+        <button type="button" onclick="setPosFilter('FW')" data-pos="FW" class="pos-btn px-2.5 py-1 rounded-lg text-xs font-bold border transition">FW</button>
+      </div>
+
+      <input id="player-search" type="text" placeholder="背番号・選手名で検索..." oninput="renderPlayerList()"
+        class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-xs text-white focus:outline-none focus:border-amber-400 shrink-0">
+
+      <div id="player-list" class="overflow-y-auto space-y-1.5 pr-1 flex-1"></div>
+
+      <div class="pt-2 border-t border-slate-800 flex justify-end shrink-0">
+        <button type="button" onclick="closePlayerModal()" class="px-5 py-2 rounded-xl text-xs font-black bg-amber-500 hover:bg-amber-400 text-slate-950 transition">
+          閉じる
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- トースト通知 -->
+  <div id="toast" class="fixed bottom-5 left-1/2 -translate-x-1/2 z-50 hidden px-4 py-2 rounded-full bg-slate-800 text-white text-xs font-bold border border-amber-400/50 shadow-xl whitespace-nowrap"></div>
+
+<script>
+const STORAGE_KEY = 'kashima_postmatch_poll_v1';
+const DEFAULT_OUTRO = '📢 次の試合もアンケート投稿やるよ！ぜひチャンネル登録して待っていてね🔥';
+
+// 最新40名ロスター
+const PLAYERS = [
+  { number: 1, name: '早川友基', pos: 'GK' },
+  { number: 21, name: '山田大樹', pos: 'GK' },
+  { number: 29, name: '梶川裕嗣', pos: 'GK' },
+  { number: 31, name: '藤井陽登', pos: 'GK' },
+
+  { number: 2, name: '安西幸輝', pos: 'DF' },
+  { number: 3, name: 'キム・テヒョン', pos: 'DF' },
+  { number: 4, name: '千田海人', pos: 'DF' },
+  { number: 5, name: '関川郁万', pos: 'DF' },
+  { number: 7, name: '小川諒也', pos: 'DF' },
+  { number: 19, name: '大森渚生', pos: 'DF' },
+  { number: 23, name: '津久井佳佑', pos: 'DF' },
+  { number: 25, name: '小池龍太', pos: 'DF' },
+  { number: 28, name: '大川佑梧', pos: 'DF' },
+  { number: 32, name: '松本遥翔', pos: 'DF' },
+  { number: 35, name: '元砂晏翔仁ウデンバ', pos: 'DF' },
+  { number: 37, name: '広瀬隆斗', pos: 'DF' },
+  { number: 45, name: '倉橋幸輝', pos: 'DF' },
+  { number: 55, name: '植田直通', pos: 'DF' },
+
+  { number: 6, name: '三竿健斗', pos: 'MF' },
+  { number: 8, name: 'マテウス・ブエノ', pos: 'MF' },
+  { number: 10, name: '柴崎岳', pos: 'MF' },
+  { number: 14, name: '樋口雄太', pos: 'MF' },
+  { number: 24, name: '林晴己', pos: 'MF' },
+  { number: 27, name: '松村優太', pos: 'MF' },
+  { number: 42, name: '大貫琉偉', pos: 'MF' },
+  { number: 43, name: '福岡勇和', pos: 'MF' },
+  { number: 44, name: '平島大悟', pos: 'MF' },
+  { number: 46, name: '岩土そら', pos: 'MF' },
+
+  { number: 9, name: 'レオ・セアラ', pos: 'FW' },
+  { number: 11, name: '田川亨介', pos: 'FW' },
+  { number: 17, name: 'エウベル', pos: 'FW' },
+  { number: 18, name: 'ヤン・マテウス', pos: 'FW' },
+  { number: 30, name: '吉田湊海', pos: 'FW' },
+  { number: 34, name: '徳田誉', pos: 'FW' },
+  { number: 40, name: '鈴木優磨', pos: 'FW' },
+  { number: 47, name: '高木瑛人', pos: 'FW' },
+  { number: 48, name: '滝澤周生', pos: 'FW' },
+  { number: 77, name: 'チャヴリッチ', pos: 'FW' }
+];
+
+const POLL_PRESETS = {
+  mom: {
+    body: '試合お疲れさまでした！\n今日のMOM（マン・オブ・ザ・マッチ）は誰だと思いますか？\n🗣️ 鹿サポの感想・声援、ぜひコメントで教えてください！',
+    outro: DEFAULT_OUTRO,
+    options: ['#40 鈴木優磨', '#9 レオ・セアラ', '#1 早川友基', '#55 植田直通', 'チーム全員がMOM！']
+  },
+  rating: {
+    body: '試合お疲れさまでした！\n今日の試合内容・パフォーマンスの評価は？\n🗣️ 良かった点や次節への期待などコメント欄へ！',
+    outro: DEFAULT_OUTRO,
+    options: ['最高！文句なしの試合！', '内容も結果も納得！', '課題はあるが次に繋がる！', '悔しい…次節こそリベンジ！', '']
+  },
+  point: {
+    body: '試合お疲れさまでした！\n今日の試合で一番印象に残ったポイントはどこですか？\n🗣️ 熱い感想をコメント欄で教えてください！',
+    outro: DEFAULT_OUTRO,
+    options: ['前線の決定力・ゴールシーン', '中盤の強度・ゲームメイク', '守備陣の集中力・クリーンシート意識', '途中交代選手の活躍', 'スタジアムの雰囲気・後押し']
+  },
+  custom: {
+    body: '試合お疲れさまでした！\n🗣️ 鹿サポの感想・声援、ぜひコメントで教えてください！',
+    outro: DEFAULT_OUTRO,
+    options: ['', '', '', '', '']
+  }
+};
+
+let state = {
+  comp: '明治安田J1リーグ',
+  round: '第15節',
+  ha: 'HOME',
+  opponent: '浦和レッズ',
+  scoreKashima: 2,
+  scoreOpponent: 1,
+  resultLabel: '勝利',
+  pollType: 'mom',
+  body: POLL_PRESETS.mom.body,
+  outro: POLL_PRESETS.mom.outro,
+  options: [...POLL_PRESETS.mom.options],
+  posFilter: 'ALL'
+};
+
+function saveState() {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({
+      comp: state.comp,
+      round: state.round,
+      ha: state.ha,
+      opponent: state.opponent,
+      scoreKashima: state.scoreKashima,
+      scoreOpponent: state.scoreOpponent,
+      resultLabel: state.resultLabel,
+      pollType: state.pollType,
+      body: state.body,
+      outro: state.outro,
+      options: state.options
+    }));
+  } catch (e) {}
+}
+
+function loadState() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return;
+    const p = JSON.parse(raw);
+    if (p.comp !== undefined) state.comp = p.comp;
+    if (p.round !== undefined) state.round = p.round;
+    if (p.ha === 'HOME' || p.ha === 'AWAY') state.ha = p.ha;
+    if (p.opponent !== undefined) state.opponent = p.opponent;
+    if (p.scoreKashima !== undefined) state.scoreKashima = p.scoreKashima;
+    if (p.scoreOpponent !== undefined) state.scoreOpponent = p.scoreOpponent;
+    if (p.resultLabel !== undefined) state.resultLabel = p.resultLabel;
+    if (p.pollType !== undefined) state.pollType = p.pollType;
+    if (p.body !== undefined) state.body = p.body;
+    state.outro = (p.outro !== undefined && p.outro.trim() !== '') ? p.outro : DEFAULT_OUTRO;
+    if (Array.isArray(p.options) && p.options.length === 5) state.options = p.options;
+  } catch (e) {}
+}
+
+function resetForm() {
+  state.comp = '明治安田J1リーグ';
+  state.round = '第15節';
+  state.ha = 'HOME';
+  state.opponent = '浦和レッズ';
+  state.scoreKashima = 2;
+  state.scoreOpponent = 1;
+  state.resultLabel = '勝利';
+  state.pollType = 'mom';
+  state.body = POLL_PRESETS.mom.body;
+  state.outro = DEFAULT_OUTRO;
+  state.options = [...POLL_PRESETS.mom.options];
+  syncInputsFromState();
+  saveState();
+  renderAll();
+  showToast('初期状態にリセットしました');
+}
+
+function resetOutroText() {
+  state.outro = DEFAULT_OUTRO;
+  document.getElementById('outro-text').value = state.outro;
+  saveState();
+  renderPreview();
+  showToast('結びの定型文に戻しました');
+}
+
+function syncInputsFromState() {
+  document.getElementById('comp-input').value = state.comp;
+  document.getElementById('round-input').value = state.round;
+  document.getElementById('opponent-input').value = state.opponent;
+  document.getElementById('score-kashima').value = state.scoreKashima;
+  document.getElementById('score-opponent').value = state.scoreOpponent;
+  document.getElementById('body-text').value = state.body;
+  document.getElementById('outro-text').value = state.outro || DEFAULT_OUTRO;
+}
+};
+
+let state = {
+  comp: '明治安田J1リーグ',
+  round: '第15節',
+  ha: 'HOME',
+  opponent: '浦和レッズ',
+  scoreKashima: 2,
+  scoreOpponent: 1,
+  resultLabel: '勝利',
+  pollType: 'mom',
+  body: POLL_PRESETS.mom.body,
+  options: [...POLL_PRESETS.mom.options],
+  posFilter: 'ALL'
+};
+
+function saveState() {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({
+      comp: state.comp,
+      round: state.round,
+      ha: state.ha,
+      opponent: state.opponent,
+      scoreKashima: state.scoreKashima,
+      scoreOpponent: state.scoreOpponent,
+      resultLabel: state.resultLabel,
+      pollType: state.pollType,
+      body: state.body,
+      options: state.options
+    }));
+  } catch (e) {}
+}
+
+function loadState() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return;
+    const p = JSON.parse(raw);
+    if (p.comp !== undefined) state.comp = p.comp;
+    if (p.round !== undefined) state.round = p.round;
+    if (p.ha === 'HOME' || p.ha === 'AWAY') state.ha = p.ha;
+    if (p.opponent !== undefined) state.opponent = p.opponent;
+    if (p.scoreKashima !== undefined) state.scoreKashima = p.scoreKashima;
+    if (p.scoreOpponent !== undefined) state.scoreOpponent = p.scoreOpponent;
+    if (p.resultLabel !== undefined) state.resultLabel = p.resultLabel;
+    if (p.pollType !== undefined) state.pollType = p.pollType;
+    if (p.body !== undefined) state.body = p.body;
+    if (Array.isArray(p.options) && p.options.length === 5) state.options = p.options;
+  } catch (e) {}
+}
+
+function resetForm() {
+  state.comp = '明治安田J1リーグ';
+  state.round = '第15節';
+  state.ha = 'HOME';
+  state.opponent = '浦和レッズ';
+  state.scoreKashima = 2;
+  state.scoreOpponent = 1;
+  state.resultLabel = '勝利';
+  state.pollType = 'mom';
+  state.body = POLL_PRESETS.mom.body;
+  state.options = [...POLL_PRESETS.mom.options];
+  syncInputsFromState();
+  saveState();
+  renderAll();
+  showToast('初期状態にリセットしました');
+}
+
+function syncInputsFromState() {
+  document.getElementById('comp-input').value = state.comp;
+  document.getElementById('round-input').value = state.round;
+  document.getElementById('opponent-input').value = state.opponent;
+  document.getElementById('score-kashima').value = state.scoreKashima;
+  document.getElementById('score-opponent').value = state.scoreOpponent;
+  document.getElementById('body-text').value = state.body;
+}
+
+function selectComp(name) {
+  state.comp = name;
+  document.getElementById('comp-input').value = name;
+  updateAll();
+}
+
+function stepRound(delta) {
+  const input = document.getElementById('round-input');
+  const val = input.value || '第1節';
+  const match = val.match(/(\d+)/);
+  if (match) {
+    const nextNum = Math.max(1, parseInt(match[1], 10) + delta);
+    input.value = val.replace(/\d+/, String(nextNum));
+  } else {
+    input.value = '第1節';
+  }
+  updateAll();
+}
+
+function setHA(val) {
+  state.ha = val;
+  updateAll();
+}
+
+function onOpponentSelect() {
+  const sel = document.getElementById('opponent-select');
+  if (sel.value) {
+    document.getElementById('opponent-input').value = sel.value;
+    updateAll();
+  }
+}
+
+function onScoreChange() {
+  const k = parseInt(document.getElementById('score-kashima').value, 10);
+  const o = parseInt(document.getElementById('score-opponent').value, 10);
+  if (!isNaN(k) && !isNaN(o)) {
+    if (k > o) state.resultLabel = '勝利';
+    else if (k === o) state.resultLabel = '引き分け';
+    else state.resultLabel = '敗戦';
+  }
+  updateAll();
+}
+
+function setResultLabel(label) {
+  state.resultLabel = label;
+  updateAll();
+}
+
+function applyPollType(type) {
+  state.pollType = type;
+  const preset = POLL_PRESETS[type];
+  if (preset) {
+    state.body = preset.body;
+    state.outro = (state.outro && state.outro.trim()) ? state.outro : (preset.outro || DEFAULT_OUTRO);
+    state.options = [...preset.options];
+    document.getElementById('body-text').value = state.body;
+    document.getElementById('outro-text').value = state.outro;
+  }
+  updateAll();
+}
+
+function updateOption(idx, value) {
+  state.options[idx] = value;
+  saveState();
+  renderPreview();
+}
+
+function clearOption(idx) {
+  state.options[idx] = '';
+  saveState();
+  renderOptions();
+  renderPreview();
+}
+
+function addQuickOption(text) {
+  if (state.options.includes(text)) {
+    showToast('すでに選択肢に入っています');
+    return;
+  }
+  const emptyIdx = state.options.findIndex(v => !v.trim());
+  if (emptyIdx !== -1) {
+    state.options[emptyIdx] = text;
+  } else {
+    state.options[4] = text;
+  }
+  saveState();
+  renderOptions();
+  renderPreview();
+  showToast(`「${text}」を追加しました`);
+}
+
+function togglePlayerOption(player) {
+  const label = `#${player.number} ${player.name}`;
+  const existIdx = state.options.indexOf(label);
+  if (existIdx !== -1) {
+    state.options[existIdx] = '';
+    showToast(`${label} を外しました`);
+  } else {
+    const emptyIdx = state.options.findIndex(v => !v.trim());
+    if (emptyIdx === -1) {
+      showToast('選択肢は最大5個までです（どれか消してから追加してください）');
+      return;
+    }
+    state.options[emptyIdx] = label;
+    showToast(`${label} を追加しました`);
+  }
+  saveState();
+  renderOptions();
+  renderPlayerList();
+  renderPreview();
+}
+
+function updateAll() {
+  state.comp = document.getElementById('comp-input').value.trim();
+  state.round = document.getElementById('round-input').value.trim();
+  state.opponent = document.getElementById('opponent-input').value.trim();
+  state.scoreKashima = document.getElementById('score-kashima').value;
+  state.scoreOpponent = document.getElementById('score-opponent').value;
+  state.body = document.getElementById('body-text').value;
+  state.outro = document.getElementById('outro-text').value;
+  saveState();
+  renderAll();
+}
+
+function updatePreview() {
+  state.body = document.getElementById('body-text').value;
+  state.outro = document.getElementById('outro-text').value;
+  saveState();
+  renderPreview();
+}
+
+function buildTitleLine() {
+  const parts = [];
+  if (state.comp) parts.push(state.comp);
+  if (state.round) parts.push(state.round);
+  if (state.opponent) parts.push(`vs ${state.opponent}`);
+  const headerPrefix = parts.join(' ');
+  const haTag = state.ha ? `(${state.ha})` : '';
+  const scorePart = (state.scoreKashima !== '' && state.scoreOpponent !== '')
+    ? `${state.scoreKashima}-${state.scoreOpponent}`
+    : '';
+  const resultPart = [scorePart, state.resultLabel].filter(Boolean).join(' ');
+
+  return `【${headerPrefix} ${haTag}｜${resultPart}】`.replace(/\s+/g, ' ');
+}
+
+function buildFullPostBody() {
+  const titleLine = buildTitleLine();
+  const bodyText = (state.body || '').trim();
+  const outroText = ((state.outro || '').trim()) || DEFAULT_OUTRO;
+  const tags = '#鹿島アントラーズ #antlers #鹿syouチャンネル';
+  return [titleLine, '', bodyText, outroText, '', tags].join('\n');
+}
+
+function renderButtons() {
+  document.querySelectorAll('.comp-btn').forEach(btn => {
+    const active = btn.textContent.trim() === state.comp;
+    btn.className = `comp-btn px-2.5 py-1.5 rounded-lg text-xs font-bold border transition ${
+      active
+        ? 'bg-red-700 text-white border-amber-400'
+        : 'bg-slate-950 text-slate-300 border-slate-700 hover:border-slate-500'
+    }`;
+  });
+
+  const homeBtn = document.getElementById('ha-home');
+  const awayBtn = document.getElementById('ha-away');
+  homeBtn.className = `py-2 rounded-xl text-xs font-black border transition ${
+    state.ha === 'HOME'
+      ? 'bg-red-700 text-white border-amber-400 shadow'
+      : 'bg-slate-950 text-slate-400 border-slate-700'
+  }`;
+  awayBtn.className = `py-2 rounded-xl text-xs font-black border transition ${
+    state.ha === 'AWAY'
+      ? 'bg-amber-500 text-slate-950 border-amber-300 shadow'
+      : 'bg-slate-950 text-slate-400 border-slate-700'
+  }`;
+
+  document.querySelectorAll('.res-btn').forEach(btn => {
+    const active = btn.dataset.res === state.resultLabel;
+    btn.className = `res-btn py-2 rounded-xl text-xs font-black border transition ${
+      active
+        ? 'bg-emerald-600 text-white border-emerald-300 shadow'
+        : 'bg-slate-950 text-slate-400 border-slate-700'
+    }`;
+  });
+
+  document.querySelectorAll('.type-btn').forEach(btn => {
+    const active = btn.dataset.type === state.pollType;
+    btn.className = `type-btn py-2 px-2 rounded-xl text-xs font-black border transition ${
+      active
+        ? 'bg-amber-500 text-slate-950 border-amber-300 shadow'
+        : 'bg-slate-950 text-slate-300 border-slate-700'
+    }`;
+  });
+}
+
+function renderOptions() {
+  const container = document.getElementById('options-container');
+  container.innerHTML = state.options.map((opt, idx) => `
+    <div class="flex items-center gap-2">
+      <span class="w-6 h-6 rounded-lg bg-slate-800 text-amber-300 font-num text-xs font-black flex items-center justify-center shrink-0">${idx + 1}</span>
+      <input type="text" value="${opt.replace(/"/g, '&quot;')}" oninput="updateOption(${idx}, this.value)"
+        placeholder="選択肢 ${idx + 1}（空欄なら省略）"
+        class="flex-1 px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-xs font-bold text-white focus:outline-none focus:border-amber-400">
+      <button type="button" onclick="clearOption(${idx})"
+        class="px-2.5 py-2 rounded-xl bg-slate-800 hover:bg-rose-950 text-slate-400 hover:text-rose-300 text-xs font-bold border border-slate-700 shrink-0">
+        消去
+      </button>
+    </div>
+  `).join('');
+}
+
+function renderPreview() {
+  const bodyEl = document.getElementById('preview-body');
+  bodyEl.textContent = buildFullPostBody();
+
+  const copyContainer = document.getElementById('preview-options-copy');
+  const activeOptions = state.options.map(v => v.trim()).filter(Boolean);
+
+  if (activeOptions.length === 0) {
+    copyContainer.innerHTML = '<p class="text-xs text-slate-500">選択肢が未入力です。</p>';
+    return;
+  }
+
+  copyContainer.innerHTML = activeOptions.map((opt, idx) => `
+    <button type="button" onclick="copyText('${opt.replace(/'/g, "\\'")}', '選択肢${idx + 1}をコピーしました')"
+      class="w-full flex items-center justify-between gap-2 px-3 py-2.5 rounded-xl bg-slate-950 hover:bg-slate-800 border border-slate-700 text-left transition">
+      <div class="flex items-center gap-2 min-w-0">
+        <span class="px-1.5 py-0.5 rounded bg-red-800 text-[10px] font-black text-white shrink-0">項目${idx + 1}</span>
+        <span class="text-xs font-bold text-white truncate">${opt}</span>
+      </div>
+      <span class="text-[11px] font-black text-amber-300 shrink-0">コピー</span>
+    </button>
+  `).join('');
+}
+
+function openPlayerModal() {
+  renderPosFilterButtons();
+  renderPlayerList();
+  const modal = document.getElementById('player-modal');
+  modal.classList.remove('hidden');
+  modal.classList.add('flex');
+}
+
+function closePlayerModal() {
+  const modal = document.getElementById('player-modal');
+  modal.classList.add('hidden');
+  modal.classList.remove('flex');
+}
+
+function setPosFilter(pos) {
+  state.posFilter = pos;
+  renderPosFilterButtons();
+  renderPlayerList();
+}
+
+function renderPosFilterButtons() {
+  document.querySelectorAll('.pos-btn').forEach(btn => {
+    const active = btn.dataset.pos === state.posFilter;
+    btn.className = `pos-btn px-2.5 py-1 rounded-lg text-xs font-bold border transition ${
+      active
+        ? 'bg-amber-500 text-slate-950 border-amber-300'
+        : 'bg-slate-950 text-slate-300 border-slate-700'
+    }`;
+  });
+}
+
+function renderPlayerList() {
+  const list = document.getElementById('player-list');
+  const q = (document.getElementById('player-search')?.value || '').trim().toLowerCase();
+  const usedCount = state.options.filter(v => v.trim()).length;
+  document.getElementById('modal-slot-count').textContent = `現在 ${usedCount} / 5 項目設定中`;
+
+  const selectedSet = new Set(state.options.map(v => v.trim()));
+  const filtered = PLAYERS.filter(p => {
+    if (state.posFilter !== 'ALL' && p.pos !== state.posFilter) return false;
+    if (!q) return true;
+    return String(p.number).includes(q) || p.name.toLowerCase().includes(q);
+  });
+
+  list.innerHTML = filtered.map(p => {
+    const label = `#${p.number} ${p.name}`;
+    const selected = selectedSet.has(label);
+    return `
+      <button type="button" onclick='togglePlayerOption(${JSON.stringify(p)})'
+        class="w-full flex items-center justify-between gap-2 p-2.5 rounded-xl border text-left transition ${
+          selected
+            ? 'bg-amber-500/15 border-amber-400'
+            : 'bg-slate-950/85 border-slate-800 hover:border-slate-600'
+        }">
+        <div class="flex items-center gap-2.5 min-w-0">
+          <span class="w-7 h-7 rounded-lg antlers-red text-white font-num text-xs font-black flex items-center justify-center shrink-0">${p.number}</span>
+          <span class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-slate-800 text-slate-300 shrink-0">${p.pos}</span>
+          <span class="text-xs font-bold text-white truncate">${p.name}</span>
+        </div>
+        <span class="text-[11px] font-black shrink-0 ${selected ? 'text-amber-300' : 'text-slate-500'}">
+          ${selected ? '選択中 ✓' : '追加'}
+        </span>
+      </button>
+    `;
+  }).join('');
+}
+
+// クリップボードコピー（iFrameプレビュー環境でも確実に動くフォールバック付き）
+function copyText(text, msg) {
+  try {
+    const textarea = document.createElement('textarea');
+    textarea.value = text;
+    textarea.style.position = 'fixed';
+    textarea.style.opacity = '0';
+    document.body.appendChild(textarea);
+    textarea.select();
+    document.execCommand('copy');
+    document.body.removeChild(textarea);
+    showToast(msg || 'コピーしました');
+  } catch (e) {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(() => showToast(msg || 'コピーしました')).catch(() => showToast('コピーに失敗しました'));
+    } else {
+      showToast('コピーに失敗しました');
+    }
+  }
+}
+
+function copyPostBody() {
+  copyText(buildFullPostBody(), 'タイトル＆本文をコピーしました！');
+}
+
+function copyAllText() {
+  const activeOptions = state.options.map(v => v.trim()).filter(Boolean);
+  const optLines = activeOptions.map((o, i) => `${i + 1}. ${o}`).join('\n');
+  const full = `${buildFullPostBody()}\n\n【アンケート項目】\n${optLines}`;
+  copyText(full, '本文と全選択肢をまとめてコピーしました！');
+}
+
+function renderAll() {
+  renderButtons();
+  renderOptions();
+  renderPreview();
+}
+
+let toastTimer = null;
+function showToast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.remove('hidden');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.add('hidden'), 2200);
+}
+
+loadState();
+syncInputsFromState();
+renderAll();
+</script>
+</body>
+</html>
