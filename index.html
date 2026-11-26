@@ -196,4 +196,737 @@
     gap: 10px;
   }
   @media (min-width: 540px) { .modal-card { border-radius: 18px; } }
-  .player-list { overflow-y: auto; display: flex; flex-direction: column
+  .player-list { overflow-y: auto; display: flex; flex-direction: column; gap: 6px; flex: 1; }
+  .player-item {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 9px 10px;
+    text-align: left;
+  }
+  .player-item.selected { background: rgba(245, 158, 11, 0.16); border-color: var(--gold); }
+  .num-badge {
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
+    background: linear-gradient(135deg, #b91c1c, #7f1d1d);
+    color: #fff;
+    font-weight: 900;
+    font-size: 12px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .toast {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 60;
+    background: #1e293b;
+    color: #fff;
+    border: 1px solid var(--gold);
+    border-radius: 999px;
+    padding: 8px 16px;
+    font-size: 12px;
+    font-weight: 800;
+    display: none;
+    white-space: nowrap;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+  }
+  .toast.show { display: block; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <div>
+      <h1>試合後アンケート作成ツール</h1>
+      <p class="sub">鹿syouチャンネル用 · スマホ即投稿ジェネレーター</p>
+    </div>
+    <button type="button" class="btn-reset" data-action="reset">リセット</button>
+  </div>
+</header>
+
+<main>
+  <!-- ① 試合情報 -->
+  <section>
+    <h2><span class="bar bar-red"></span>① 試合情報（タイトルに自動反映）</h2>
+
+    <div>
+      <label>大会名</label>
+      <div class="row-wrap" style="margin-bottom:6px;">
+        <button type="button" data-action="comp" data-val="明治安田J1リーグ">明治安田J1リーグ</button>
+        <button type="button" data-action="comp" data-val="JリーグYBCルヴァンカップ">ルヴァンカップ</button>
+        <button type="button" data-action="comp" data-val="天皇杯">天皇杯</button>
+        <button type="button" data-action="comp" data-val="ACL">ACL</button>
+      </div>
+      <input id="comp-input" type="text" value="明治安田J1リーグ" placeholder="大会名を直接入力">
+    </div>
+
+    <div class="grid-2">
+      <div>
+        <label>試合名（第〇節など）</label>
+        <div class="flex-row">
+          <input id="round-input" type="text" value="第1節" placeholder="例: 第15節">
+          <button type="button" data-action="step-round" style="flex-shrink:0; color:#fcd34d;">+1</button>
+        </div>
+      </div>
+      <div>
+        <label>HOME / AWAY</label>
+        <div class="grid-2">
+          <button type="button" data-action="ha" data-val="HOME">HOME</button>
+          <button type="button" data-action="ha" data-val="AWAY">AWAY</button>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <label>対戦相手</label>
+      <div class="grid-2">
+        <select id="opponent-select">
+          <option value="">一覧から選択...</option>
+          <option value="浦和レッズ">浦和レッズ</option>
+          <option value="FC東京">FC東京</option>
+          <option value="東京ヴェルディ">東京ヴェルディ</option>
+          <option value="FC町田ゼルビア">FC町田ゼルビア</option>
+          <option value="川崎フロンターレ">川崎フロンターレ</option>
+          <option value="横浜F・マリノス">横浜F・マリノス</option>
+          <option value="横浜FC">横浜FC</option>
+          <option value="湘南ベルマーレ">湘南ベルマーレ</option>
+          <option value="柏レイソル">柏レイソル</option>
+          <option value="ジェフユナイテッド千葉">ジェフユナイテッド千葉</option>
+          <option value="水戸ホーリーホック">水戸ホーリーホック</option>
+          <option value="アルビレックス新潟">アルビレックス新潟</option>
+          <option value="清水エスパルス">清水エスパルス</option>
+          <option value="名古屋グランパス">名古屋グランパス</option>
+          <option value="京都サンガF.C.">京都サンガF.C.</option>
+          <option value="ガンバ大阪">ガンバ大阪</option>
+          <option value="セレッソ大阪">セレッソ大阪</option>
+          <option value="ヴィッセル神戸">ヴィッセル神戸</option>
+          <option value="ファジアーノ岡山">ファジアーノ岡山</option>
+          <option value="サンフレッチェ広島">サンフレッチェ広島</option>
+          <option value="アビスパ福岡">アビスパ福岡</option>
+        </select>
+        <input id="opponent-input" type="text" value="浦和レッズ" placeholder="対戦相手名">
+      </div>
+    </div>
+
+    <div>
+      <label>試合結果（左: 鹿島 ／ 右: 相手）</label>
+      <div class="flex-row" style="flex-wrap:wrap;">
+        <div class="score-box">
+          <span style="font-size:11px;font-weight:900;color:#f87171;">鹿島</span>
+          <input id="score-kashima" type="number" min="0" max="20" value="2">
+          <span style="font-weight:900;color:#94a3b8;">-</span>
+          <input id="score-opponent" type="number" min="0" max="20" value="1">
+          <span style="font-size:11px;font-weight:700;color:#94a3b8;">相手</span>
+        </div>
+        <div class="grid-3" style="flex:1; min-width:160px;">
+          <button type="button" data-action="result" data-val="勝利">勝利</button>
+          <button type="button" data-action="result" data-val="引き分け">引分</button>
+          <button type="button" data-action="result" data-val="敗戦">敗戦</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ② アンケート種類・本文 -->
+  <section>
+    <h2><span class="bar bar-gold"></span>② アンケート種類・本文</h2>
+
+    <div class="grid-4">
+      <button type="button" data-action="poll-type" data-val="mom">今日のMOM</button>
+      <button type="button" data-action="poll-type" data-val="rating">試合の評価</button>
+      <button type="button" data-action="poll-type" data-val="point">勝因・ポイント</button>
+      <button type="button" data-action="poll-type" data-val="custom">自由入力</button>
+    </div>
+
+    <div>
+      <label>質問文・本文メッセージ</label>
+      <textarea id="body-text" rows="3"></textarea>
+    </div>
+
+    <div>
+      <label>末尾の結び文（チャンネル登録＆次回予告は必ず入ります）</label>
+      <textarea id="outro-text" rows="2"></textarea>
+    </div>
+  </section>
+
+  <!-- ③ 選択肢 -->
+  <section>
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;">
+      <h2><span class="bar bar-green"></span>③ アンケート選択肢（最大5個）</h2>
+      <button type="button" class="btn-gold" data-action="open-modal">＋ 選手から選ぶ</button>
+    </div>
+
+    <div id="options-container" style="display:flex;flex-direction:column;gap:8px;"></div>
+
+    <div>
+      <label>ワンタップ追加</label>
+      <div class="row-wrap">
+        <button type="button" data-action="quick-opt" data-val="チーム全員がMOM！" style="color:#fde68a;">+ チーム全員がMOM！</button>
+        <button type="button" data-action="quick-opt" data-val="その他（コメント欄へ！）">+ その他（コメント欄へ！）</button>
+        <button type="button" data-action="quick-opt" data-val="現地・DAZN応援のサポーター">+ サポーター</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ④ 出力プレビュー -->
+  <section class="highlight">
+    <div style="display:flex;align-items:center;justify-content:space-between;">
+      <h2 style="color:#fcd34d;">④ YouTube投稿用テキスト出力</h2>
+      <span style="font-size:11px;color:#94a3b8;">コピペしてそのまま投稿OK</span>
+    </div>
+
+    <div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+        <span style="font-size:12px;font-weight:700;">投稿タイトル＆本文</span>
+        <button type="button" class="btn-gold" data-action="copy-body">本文をコピー</button>
+      </div>
+      <pre id="preview-body"></pre>
+    </div>
+
+    <div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+        <span style="font-size:12px;font-weight:700;">選択肢（タップで1つずつコピー）</span>
+        <button type="button" data-action="copy-all">全部まとめてコピー</button>
+      </div>
+      <div id="preview-options-copy" style="display:flex;flex-direction:column;gap:6px;"></div>
+    </div>
+
+    <a class="btn-yt" href="https://www.youtube.com/@syou0120/community" target="_blank" rel="noopener noreferrer">
+      YouTubeの投稿画面を開く（@syou0120）
+    </a>
+  </section>
+</main>
+
+<!-- 選手選択モーダル -->
+<div id="player-modal" class="modal-bg">
+  <div class="modal-card">
+    <div style="display:flex;align-items:center;justify-content:space-between;">
+      <div>
+        <div style="font-weight:900;font-size:15px;">選択肢に入れる選手をタップ</div>
+        <div id="modal-slot-count" style="font-size:11px;font-weight:800;color:#fcd34d;">現在 0 / 5 項目設定中</div>
+      </div>
+      <button type="button" data-action="close-modal">✕ 閉じる</button>
+    </div>
+
+    <div class="row-wrap">
+      <button type="button" data-action="pos-filter" data-val="ALL">ALL</button>
+      <button type="button" data-action="pos-filter" data-val="GK">GK</button>
+      <button type="button" data-action="pos-filter" data-val="DF">DF</button>
+      <button type="button" data-action="pos-filter" data-val="MF">MF</button>
+      <button type="button" data-action="pos-filter" data-val="FW">FW</button>
+    </div>
+
+    <input id="player-search" type="text" placeholder="背番号・選手名で検索...">
+    <div id="player-list" class="player-list"></div>
+  </div>
+</div>
+
+<div id="toast" class="toast"></div>
+
+<script>
+(function () {
+  var STORAGE_KEY = 'kashima_postmatch_poll_v2';
+  var DEFAULT_OUTRO = '📢 次の試合もアンケート投稿やるよ！ぜひチャンネル登録して待っていてね🔥';
+
+  var PLAYERS = [
+    { number: 1, name: '早川友基', pos: 'GK' },
+    { number: 21, name: '山田大樹', pos: 'GK' },
+    { number: 29, name: '梶川裕嗣', pos: 'GK' },
+    { number: 31, name: '藤井陽登', pos: 'GK' },
+    { number: 2, name: '安西幸輝', pos: 'DF' },
+    { number: 3, name: 'キム・テヒョン', pos: 'DF' },
+    { number: 4, name: '千田海人', pos: 'DF' },
+    { number: 5, name: '関川郁万', pos: 'DF' },
+    { number: 7, name: '小川諒也', pos: 'DF' },
+    { number: 19, name: '大森渚生', pos: 'DF' },
+    { number: 23, name: '津久井佳佑', pos: 'DF' },
+    { number: 25, name: '小池龍太', pos: 'DF' },
+    { number: 28, name: '大川佑梧', pos: 'DF' },
+    { number: 32, name: '松本遥翔', pos: 'DF' },
+    { number: 35, name: '元砂晏翔仁ウデンバ', pos: 'DF' },
+    { number: 37, name: '広瀬隆斗', pos: 'DF' },
+    { number: 45, name: '倉橋幸輝', pos: 'DF' },
+    { number: 55, name: '植田直通', pos: 'DF' },
+    { number: 6, name: '三竿健斗', pos: 'MF' },
+    { number: 8, name: 'マテウス・ブエノ', pos: 'MF' },
+    { number: 10, name: '柴崎岳', pos: 'MF' },
+    { number: 14, name: '樋口雄太', pos: 'MF' },
+    { number: 24, name: '林晴己', pos: 'MF' },
+    { number: 27, name: '松村優太', pos: 'MF' },
+    { number: 42, name: '大貫琉偉', pos: 'MF' },
+    { number: 43, name: '福岡勇和', pos: 'MF' },
+    { number: 44, name: '平島大悟', pos: 'MF' },
+    { number: 46, name: '岩土そら', pos: 'MF' },
+    { number: 9, name: 'レオ・セアラ', pos: 'FW' },
+    { number: 11, name: '田川亨介', pos: 'FW' },
+    { number: 17, name: 'エウベル', pos: 'FW' },
+    { number: 18, name: 'ヤン・マテウス', pos: 'FW' },
+    { number: 30, name: '吉田湊海', pos: 'FW' },
+    { number: 34, name: '徳田誉', pos: 'FW' },
+    { number: 40, name: '鈴木優磨', pos: 'FW' },
+    { number: 47, name: '高木瑛人', pos: 'FW' },
+    { number: 48, name: '滝澤周生', pos: 'FW' },
+    { number: 77, name: 'チャヴリッチ', pos: 'FW' }
+  ];
+
+  var POLL_PRESETS = {
+    mom: {
+      body: '試合お疲れさまでした！\n今日のMOM（マン・オブ・ザ・マッチ）は誰だと思いますか？\n🗣️ 鹿サポの感想・声援、ぜひコメントで教えてください！',
+      options: ['#40 鈴木優磨', '#9 レオ・セアラ', '#1 早川友基', '#55 植田直通', 'チーム全員がMOM！']
+    },
+    rating: {
+      body: '試合お疲れさまでした！\n今日の試合内容・パフォーマンスの評価は？\n🗣️ 良かった点や次節への期待などコメント欄へ！',
+      options: ['最高！文句なしの試合！', '内容も結果も納得！', '課題はあるが次に繋がる！', '悔しい…次節こそリベンジ！', '']
+    },
+    point: {
+      body: '試合お疲れさまでした！\n今日の試合で一番印象に残ったポイントはどこですか？\n🗣️ 熱い感想をコメント欄で教えてください！',
+      options: ['前線の決定力・ゴールシーン', '中盤の強度・ゲームメイク', '守備陣の集中力・クリーンシート意識', '途中交代選手の活躍', 'スタジアムの雰囲気・後押し']
+    },
+    custom: {
+      body: '試合お疲れさまでした！\n🗣️ 鹿サポの感想・声援、ぜひコメントで教えてください！',
+      options: ['', '', '', '', '']
+    }
+  };
+
+  var state = {
+    comp: '明治安田J1リーグ',
+    round: '第1節',
+    ha: 'HOME',
+    opponent: '浦和レッズ',
+    scoreKashima: '2',
+    scoreOpponent: '1',
+    resultLabel: '勝利',
+    pollType: 'mom',
+    body: POLL_PRESETS.mom.body,
+    outro: DEFAULT_OUTRO,
+    options: POLL_PRESETS.mom.options.slice(),
+    posFilter: 'ALL'
+  };
+
+  function saveState() {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    } catch (e) {}
+  }
+
+  function loadState() {
+    try {
+      var raw = localStorage.getItem(STORAGE_KEY);
+      if (!raw) return;
+      var p = JSON.parse(raw);
+      if (p.comp !== undefined) state.comp = p.comp;
+      if (p.round !== undefined) state.round = p.round;
+      if (p.ha === 'HOME' || p.ha === 'AWAY') state.ha = p.ha;
+      if (p.opponent !== undefined) state.opponent = p.opponent;
+      if (p.scoreKashima !== undefined) state.scoreKashima = String(p.scoreKashima);
+      if (p.scoreOpponent !== undefined) state.scoreOpponent = String(p.scoreOpponent);
+      if (p.resultLabel !== undefined) state.resultLabel = p.resultLabel;
+      if (p.pollType !== undefined) state.pollType = p.pollType;
+      if (p.body !== undefined) state.body = p.body;
+      if (p.outro !== undefined) state.outro = p.outro;
+      if (Array.isArray(p.options) && p.options.length === 5) state.options = p.options;
+    } catch (e) {}
+  }
+
+  function syncInputs() {
+    document.getElementById('comp-input').value = state.comp;
+    document.getElementById('round-input').value = state.round;
+    document.getElementById('opponent-input').value = state.opponent;
+    document.getElementById('score-kashima').value = state.scoreKashima;
+    document.getElementById('score-opponent').value = state.scoreOpponent;
+    document.getElementById('body-text').value = state.body;
+    document.getElementById('outro-text').value = state.outro;
+  }
+
+  function buildTitleLine() {
+    var parts = [];
+    if (state.comp) parts.push(state.comp);
+    if (state.round) parts.push(state.round);
+    if (state.opponent) parts.push('vs ' + state.opponent);
+    var prefix = parts.join(' ');
+    var haTag = state.ha ? '(' + state.ha + ')' : '';
+    var scorePart = (state.scoreKashima !== '' && state.scoreOpponent !== '')
+      ? (state.scoreKashima + '-' + state.scoreOpponent)
+      : '';
+    var resPart = [scorePart, state.resultLabel].filter(Boolean).join(' ');
+    return ('【' + prefix + ' ' + haTag + '｜' + resPart + '】').replace(/\s+/g, ' ');
+  }
+
+  function buildFullPostBody() {
+    var titleLine = buildTitleLine();
+    var bodyText = (state.body || '').trim();
+    var outroText = (state.outro || '').trim() || DEFAULT_OUTRO;
+    var tags = '#鹿島アントラーズ #antlers #鹿syouチャンネル';
+    return [titleLine, '', bodyText, '', outroText, '', tags].join('\n');
+  }
+
+  function renderButtons() {
+    document.querySelectorAll('[data-action="comp"]').forEach(function (btn) {
+      btn.className = (btn.getAttribute('data-val') === state.comp) ? 'active-red' : '';
+    });
+    document.querySelectorAll('[data-action="ha"]').forEach(function (btn) {
+      var v = btn.getAttribute('data-val');
+      if (v === state.ha) {
+        btn.className = (v === 'HOME') ? 'active-red' : 'active-gold';
+      } else {
+        btn.className = '';
+      }
+    });
+    document.querySelectorAll('[data-action="result"]').forEach(function (btn) {
+      btn.className = (btn.getAttribute('data-val') === state.resultLabel) ? 'active-green' : '';
+    });
+    document.querySelectorAll('[data-action="poll-type"]').forEach(function (btn) {
+      btn.className = (btn.getAttribute('data-val') === state.pollType) ? 'active-gold' : '';
+    });
+  }
+
+  function renderOptions() {
+    var container = document.getElementById('options-container');
+    container.innerHTML = '';
+    state.options.forEach(function (opt, idx) {
+      var row = document.createElement('div');
+      row.className = 'flex-row';
+
+      var num = document.createElement('span');
+      num.className = 'opt-num';
+      num.textContent = String(idx + 1);
+
+      var inp = document.createElement('input');
+      inp.type = 'text';
+      inp.value = opt;
+      inp.placeholder = '選択肢 ' + (idx + 1) + '（空欄なら省略）';
+      inp.setAttribute('data-opt-idx', String(idx));
+
+      var delBtn = document.createElement('button');
+      delBtn.type = 'button';
+      delBtn.textContent = '消去';
+      delBtn.style.flexShrink = '0';
+      delBtn.setAttribute('data-action', 'clear-opt');
+      delBtn.setAttribute('data-idx', String(idx));
+
+      row.appendChild(num);
+      row.appendChild(inp);
+      row.appendChild(delBtn);
+      container.appendChild(row);
+    });
+  }
+
+  function renderPreview() {
+    document.getElementById('preview-body').textContent = buildFullPostBody();
+    var copyContainer = document.getElementById('preview-options-copy');
+    copyContainer.innerHTML = '';
+    var activeOptions = state.options.map(function (v) { return v.trim(); }).filter(Boolean);
+
+    if (activeOptions.length === 0) {
+      var emptyMsg = document.createElement('div');
+      emptyMsg.style.fontSize = '12px';
+      emptyMsg.style.color = '#94a3b8';
+      emptyMsg.textContent = '選択肢が未入力です。';
+      copyContainer.appendChild(emptyMsg);
+      return;
+    }
+
+    activeOptions.forEach(function (opt, idx) {
+      var btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'copy-opt-btn';
+      btn.setAttribute('data-action', 'copy-opt');
+      btn.setAttribute('data-opt-text', opt);
+      btn.setAttribute('data-opt-num', String(idx + 1));
+
+      var left = document.createElement('span');
+      left.style.display = 'flex';
+      left.style.alignItems = 'center';
+      left.style.gap = '8px';
+
+      var badge = document.createElement('span');
+      badge.className = 'badge-red';
+      badge.textContent = '項目' + (idx + 1);
+
+      var label = document.createElement('span');
+      label.textContent = opt;
+
+      var right = document.createElement('span');
+      right.style.color = '#fcd34d';
+      right.style.fontSize = '11px';
+      right.style.flexShrink = '0';
+      right.textContent = 'コピー';
+
+      left.appendChild(badge);
+      left.appendChild(label);
+      btn.appendChild(left);
+      btn.appendChild(right);
+      copyContainer.appendChild(btn);
+    });
+  }
+
+  function renderPlayerList() {
+    document.querySelectorAll('[data-action="pos-filter"]').forEach(function (btn) {
+      btn.className = (btn.getAttribute('data-val') === state.posFilter) ? 'active-gold' : '';
+    });
+
+    var usedCount = state.options.filter(function (v) { return v.trim(); }).length;
+    document.getElementById('modal-slot-count').textContent = '現在 ' + usedCount + ' / 5 項目設定中';
+
+    var q = (document.getElementById('player-search').value || '').trim().toLowerCase();
+    var list = document.getElementById('player-list');
+    list.innerHTML = '';
+
+    PLAYERS.filter(function (p) {
+      if (state.posFilter !== 'ALL' && p.pos !== state.posFilter) return false;
+      if (!q) return true;
+      return String(p.number).indexOf(q) !== -1 || p.name.toLowerCase().indexOf(q) !== -1;
+    }).forEach(function (p) {
+      var label = '#' + p.number + ' ' + p.name;
+      var selected = state.options.indexOf(label) !== -1;
+
+      var btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'player-item' + (selected ? ' selected' : '');
+      btn.setAttribute('data-action', 'toggle-player');
+      btn.setAttribute('data-player-label', label);
+
+      var left = document.createElement('span');
+      left.style.display = 'flex';
+      left.style.alignItems = 'center';
+      left.style.gap = '8px';
+
+      var num = document.createElement('span');
+      num.className = 'num-badge';
+      num.textContent = String(p.number);
+
+      var pos = document.createElement('span');
+      pos.style.fontSize = '10px';
+      pos.style.padding = '2px 5px';
+      pos.style.borderRadius = '5px';
+      pos.style.background = '#1e293b';
+      pos.style.color = '#cbd5e1';
+      pos.textContent = p.pos;
+
+      var name = document.createElement('span');
+      name.textContent = p.name;
+
+      var right = document.createElement('span');
+      right.style.fontSize = '11px';
+      right.style.color = selected ? '#fcd34d' : '#64748b';
+      right.textContent = selected ? '選択中 ✓' : '追加';
+
+      left.appendChild(num);
+      left.appendChild(pos);
+      left.appendChild(name);
+      btn.appendChild(left);
+      btn.appendChild(right);
+      list.appendChild(btn);
+    });
+  }
+
+  function renderAll() {
+    renderButtons();
+    renderOptions();
+    renderPreview();
+  }
+
+  var toastTimer = null;
+  function showToast(msg) {
+    var el = document.getElementById('toast');
+    el.textContent = msg;
+    el.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () { el.classList.remove('show'); }, 2200);
+  }
+
+  function fallbackCopy(text) {
+    var ta = document.createElement('textarea');
+    ta.value = text;
+    ta.style.position = 'fixed';
+    ta.style.opacity = '0';
+    document.body.appendChild(ta);
+    ta.focus();
+    ta.select();
+    try { document.execCommand('copy'); } catch (e) {}
+    document.body.removeChild(ta);
+  }
+
+  function copyText(text, msg) {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(function () {
+        showToast(msg);
+      }).catch(function () {
+        fallbackCopy(text);
+        showToast(msg);
+      });
+    } else {
+      fallbackCopy(text);
+      showToast(msg);
+    }
+  }
+
+  // すべてのボタン操作を一元処理
+  document.addEventListener('click', function (e) {
+    var btn = e.target.closest('button');
+    if (!btn) return;
+    var action = btn.getAttribute('data-action');
+    if (!action) return;
+
+    if (action === 'reset') {
+      state.comp = '明治安田J1リーグ';
+      state.round = '第1節';
+      state.ha = 'HOME';
+      state.opponent = '浦和レッズ';
+      state.scoreKashima = '2';
+      state.scoreOpponent = '1';
+      state.resultLabel = '勝利';
+      state.pollType = 'mom';
+      state.body = POLL_PRESETS.mom.body;
+      state.outro = DEFAULT_OUTRO;
+      state.options = POLL_PRESETS.mom.options.slice();
+      syncInputs();
+      saveState();
+      renderAll();
+      showToast('初期状態にリセットしました');
+    } else if (action === 'comp') {
+      state.comp = btn.getAttribute('data-val');
+      document.getElementById('comp-input').value = state.comp;
+      saveState();
+      renderAll();
+    } else if (action === 'step-round') {
+      var cur = document.getElementById('round-input').value || '第1節';
+      var m = cur.match(/(\d+)/);
+      state.round = m ? cur.replace(/\d+/, String(Math.max(1, parseInt(m[1], 10) + 1))) : '第1節';
+      document.getElementById('round-input').value = state.round;
+      saveState();
+      renderAll();
+    } else if (action === 'ha') {
+      state.ha = btn.getAttribute('data-val');
+      saveState();
+      renderAll();
+    } else if (action === 'result') {
+      state.resultLabel = btn.getAttribute('data-val');
+      saveState();
+      renderAll();
+    } else if (action === 'poll-type') {
+      var t = btn.getAttribute('data-val');
+      state.pollType = t;
+      if (POLL_PRESETS[t]) {
+        state.body = POLL_PRESETS[t].body;
+        state.options = POLL_PRESETS[t].options.slice();
+        document.getElementById('body-text').value = state.body;
+      }
+      saveState();
+      renderAll();
+    } else if (action === 'clear-opt') {
+      var idx = parseInt(btn.getAttribute('data-idx'), 10);
+      state.options[idx] = '';
+      saveState();
+      renderOptions();
+      renderPreview();
+    } else if (action === 'quick-opt') {
+      var val = btn.getAttribute('data-val');
+      if (state.options.indexOf(val) !== -1) {
+        showToast('すでに選択肢に入っています');
+        return;
+      }
+      var emptyIdx = state.options.findIndex(function (v) { return !v.trim(); });
+      if (emptyIdx !== -1) state.options[emptyIdx] = val;
+      else state.options[4] = val;
+      saveState();
+      renderOptions();
+      renderPreview();
+      showToast('「' + val + '」を追加しました');
+    } else if (action === 'open-modal') {
+      renderPlayerList();
+      document.getElementById('player-modal').classList.add('open');
+    } else if (action === 'close-modal') {
+      document.getElementById('player-modal').classList.remove('open');
+    } else if (action === 'pos-filter') {
+      state.posFilter = btn.getAttribute('data-val');
+      renderPlayerList();
+    } else if (action === 'toggle-player') {
+      var label = btn.getAttribute('data-player-label');
+      var existIdx = state.options.indexOf(label);
+      if (existIdx !== -1) {
+        state.options[existIdx] = '';
+        showToast(label + ' を外しました');
+      } else {
+        var slot = state.options.findIndex(function (v) { return !v.trim(); });
+        if (slot === -1) {
+          showToast('選択肢は最大5個までです');
+          return;
+        }
+        state.options[slot] = label;
+        showToast(label + ' を追加しました');
+      }
+      saveState();
+      renderOptions();
+      renderPlayerList();
+      renderPreview();
+    } else if (action === 'copy-body') {
+      copyText(buildFullPostBody(), 'タイトル＆本文をコピーしました！');
+    } else if (action === 'copy-opt') {
+      copyText(btn.getAttribute('data-opt-text'), '選択肢' + btn.getAttribute('data-opt-num') + 'をコピーしました');
+    } else if (action === 'copy-all') {
+      var active = state.options.map(function (v) { return v.trim(); }).filter(Boolean);
+      var lines = active.map(function (o, i) { return (i + 1) + '. ' + o; }).join('\n');
+      copyText(buildFullPostBody() + '\n\n【アンケート項目】\n' + lines, '本文と全選択肢をまとめてコピーしました！');
+    }
+  });
+
+  // 入力欄の変更を一元処理
+  document.addEventListener('input', function (e) {
+    var el = e.target;
+    if (el.id === 'comp-input') {
+      state.comp = el.value.trim();
+      renderButtons();
+    } else if (el.id === 'round-input') {
+      state.round = el.value.trim();
+    } else if (el.id === 'opponent-input') {
+      state.opponent = el.value.trim();
+    } else if (el.id === 'score-kashima' || el.id === 'score-opponent') {
+      state.scoreKashima = document.getElementById('score-kashima').value;
+      state.scoreOpponent = document.getElementById('score-opponent').value;
+      var k = parseInt(state.scoreKashima, 10);
+      var o = parseInt(state.scoreOpponent, 10);
+      if (!isNaN(k) && !isNaN(o)) {
+        if (k > o) state.resultLabel = '勝利';
+        else if (k === o) state.resultLabel = '引き分け';
+        else state.resultLabel = '敗戦';
+        renderButtons();
+      }
+    } else if (el.id === 'body-text') {
+      state.body = el.value;
+    } else if (el.id === 'outro-text') {
+      state.outro = el.value;
+    } else if (el.hasAttribute('data-opt-idx')) {
+      var i = parseInt(el.getAttribute('data-opt-idx'), 10);
+      state.options[i] = el.value;
+    } else if (el.id === 'player-search') {
+      renderPlayerList();
+      return;
+    }
+    saveState();
+    renderPreview();
+  });
+
+  document.getElementById('opponent-select').addEventListener('change', function (e) {
+    if (e.target.value) {
+      state.opponent = e.target.value;
+      document.getElementById('opponent-input').value = state.opponent;
+      saveState();
+      renderPreview();
+    }
+  });
+
+  loadState();
+  syncInputs();
+  renderAll();
+})();
+</script>
+</body>
+</html>
