@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>鹿島アントラーズ 試合前・試合後ポスト＆アンケート作成メーカー</title>
+<title>鹿島アントラーズ 試合前・試合後MOMアンケート＆ポスト作成</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&family=Noto+Sans+JP:wght@400;500;700;800;900&display=swap" rel="stylesheet">
 <style>
@@ -13,8 +13,15 @@
     color: #f8fafc;
     -webkit-tap-highlight-color: transparent;
   }
+  .font-num {
+    font-family: 'Inter', 'Noto Sans JP', sans-serif;
+    font-variant-numeric: tabular-nums;
+  }
   .antlers-header {
     background: linear-gradient(90deg, #991b1b 0%, #7f1d1d 55%, #450a0a 100%);
+  }
+  .antlers-red {
+    background: linear-gradient(135deg, #b91c1c 0%, #7f1d1d 100%);
   }
   input[type="date"]::-webkit-calendar-picker-indicator {
     filter: invert(1);
@@ -28,7 +35,7 @@
   <header class="antlers-header border-b border-amber-400/30 sticky top-0 z-30">
     <div class="max-w-3xl mx-auto px-4 py-2.5 flex items-center justify-between gap-2">
       <div class="min-w-0">
-        <h1 class="text-sm sm:text-base font-black tracking-tight text-white truncate">試合前・後ポスト＆アンケート作成</h1>
+        <h1 class="text-sm sm:text-base font-black tracking-tight text-white truncate">試合前・後 MOMアンケート＆ポスト作成</h1>
         <p class="text-[10px] text-amber-200/85 truncate">鹿島アントラーズ · Created by @syou0120</p>
       </div>
       <div class="flex items-center gap-1.5 shrink-0">
@@ -51,11 +58,11 @@
       <div class="grid grid-cols-2 gap-2">
         <button type="button" id="mode-pre-btn" onclick="setTimingMode('pre')"
           class="py-2.5 px-3 rounded-xl text-xs sm:text-sm font-black border transition flex items-center justify-center gap-1.5">
-          <span>🔥 試合前ポスト</span>
+          <span>🔥 試合前（期待のMOM）</span>
         </button>
         <button type="button" id="mode-post-btn" onclick="setTimingMode('post')"
           class="py-2.5 px-3 rounded-xl text-xs sm:text-sm font-black border transition flex items-center justify-center gap-1.5">
-          <span>📊 試合後ポスト</span>
+          <span>📊 試合後（今日のMOM）</span>
         </button>
       </div>
     </section>
@@ -162,7 +169,7 @@
       </div>
     </section>
 
-    <!-- 3. スコア（試合後のみ表示）＆アンケート4択 -->
+    <!-- 3. スコア（試合後のみ表示）＆ MOMアンケート4択 -->
     <section class="bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-3">
       <h2 id="section3-heading" class="text-xs sm:text-sm font-black text-white flex items-center gap-1.5">
         <span class="w-1.5 h-4 bg-red-600 rounded-full"></span>
@@ -204,29 +211,73 @@
         </div>
       </div>
 
-      <!-- アンケート4択 -->
-      <div class="space-y-1.5 pt-1">
-        <div class="flex items-center justify-between gap-2">
-          <label id="poll-label" class="text-[11px] font-bold text-slate-400">Xアンケート4択（今日のMOM・印象に残った選手）</label>
-          <button type="button" onclick="applyPollPreset()" class="text-[11px] font-bold text-amber-300 underline shrink-0">
-            定型4択を入れる
-          </button>
+      <!-- MOMアンケート4択（選手ピッカー選択 ＋ 自由入力 ＋ 定型編集） -->
+      <div class="space-y-2 pt-1">
+        <div class="flex items-center justify-between gap-2 flex-wrap">
+          <label id="poll-label" class="text-[11px] font-bold text-slate-400">Xアンケート4択（MOM候補）</label>
+          <div class="flex items-center gap-2">
+            <button type="button" onclick="applyPollPreset()"
+              class="px-2.5 py-1 rounded-lg text-[11px] font-black bg-slate-800 hover:bg-slate-700 text-amber-300 border border-slate-700 transition">
+              定型4択を入れる
+            </button>
+            <button type="button" onclick="openPresetEditor()"
+              class="px-2.5 py-1 rounded-lg text-[11px] font-bold bg-slate-950 hover:bg-slate-800 text-slate-300 border border-slate-700 transition">
+              定型4択を編集
+            </button>
+          </div>
         </div>
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
-          <input id="poll-opt-1" type="text" value="鈴木優磨" placeholder="選択肢1" oninput="onStateChange()"
-            class="px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-xs font-bold text-white focus:outline-none focus:border-amber-400">
-          <input id="poll-opt-2" type="text" value="レオ・セアラ" placeholder="選択肢2" oninput="onStateChange()"
-            class="px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-xs font-bold text-white focus:outline-none focus:border-amber-400">
-          <input id="poll-opt-3" type="text" value="早川友基" placeholder="選択肢3" oninput="onStateChange()"
-            class="px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-xs font-bold text-white focus:outline-none focus:border-amber-400">
-          <input id="poll-opt-4" type="text" value="チーム全員（リプ欄へ！）" placeholder="選択肢4" oninput="onStateChange()"
-            class="px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-xs font-bold text-white focus:outline-none focus:border-amber-400">
+
+        <div class="space-y-2">
+          <!-- 枠1 -->
+          <div class="flex items-center gap-1.5">
+            <span class="text-xs font-black text-amber-400 w-5 text-center shrink-0">①</span>
+            <input id="poll-opt-1" type="text" placeholder="ポジション・背番号・選手名 / 自由入力" oninput="onStateChange()"
+              class="flex-1 min-w-0 px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-xs sm:text-sm font-bold text-white focus:outline-none focus:border-amber-400">
+            <button type="button" onclick="openPlayerModal(0)"
+              class="px-2.5 py-2 rounded-xl text-[11px] font-black bg-red-700 hover:bg-red-600 text-white border border-amber-400/60 shrink-0 transition">
+              選手選択
+            </button>
+          </div>
+
+          <!-- 枠2 -->
+          <div class="flex items-center gap-1.5">
+            <span class="text-xs font-black text-amber-400 w-5 text-center shrink-0">②</span>
+            <input id="poll-opt-2" type="text" placeholder="ポジション・背番号・選手名 / 自由入力" oninput="onStateChange()"
+              class="flex-1 min-w-0 px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-xs sm:text-sm font-bold text-white focus:outline-none focus:border-amber-400">
+            <button type="button" onclick="openPlayerModal(1)"
+              class="px-2.5 py-2 rounded-xl text-[11px] font-black bg-red-700 hover:bg-red-600 text-white border border-amber-400/60 shrink-0 transition">
+              選手選択
+            </button>
+          </div>
+
+          <!-- 枠3 -->
+          <div class="flex items-center gap-1.5">
+            <span class="text-xs font-black text-amber-400 w-5 text-center shrink-0">③</span>
+            <input id="poll-opt-3" type="text" placeholder="ポジション・背番号・選手名 / 自由入力" oninput="onStateChange()"
+              class="flex-1 min-w-0 px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-xs sm:text-sm font-bold text-white focus:outline-none focus:border-amber-400">
+            <button type="button" onclick="openPlayerModal(2)"
+              class="px-2.5 py-2 rounded-xl text-[11px] font-black bg-red-700 hover:bg-red-600 text-white border border-amber-400/60 shrink-0 transition">
+              選手選択
+            </button>
+          </div>
+
+          <!-- 枠4 -->
+          <div class="flex items-center gap-1.5">
+            <span class="text-xs font-black text-amber-400 w-5 text-center shrink-0">④</span>
+            <input id="poll-opt-4" type="text" placeholder="ポジション・背番号・選手名 / 自由入力" oninput="onStateChange()"
+              class="flex-1 min-w-0 px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-xs sm:text-sm font-bold text-white focus:outline-none focus:border-amber-400">
+            <button type="button" onclick="openPlayerModal(3)"
+              class="px-2.5 py-2 rounded-xl text-[11px] font-black bg-red-700 hover:bg-red-600 text-white border border-amber-400/60 shrink-0 transition">
+              選手選択
+            </button>
+          </div>
         </div>
+        <p class="text-[10px] text-slate-400">※「選手選択」から選ぶと「FW #40 鈴木優磨」形式で入ります。テキスト欄をタップして直接書き換えもできます。</p>
       </div>
     </section>
 
-    <!-- 4. 意気込み・見どころメッセージ（2行目）＋ AI自動生成ボタン -->
-    <section class="bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-2.5">
+    <!-- 4. 意気込み・見どころメッセージ（2行目）＋ チャンネル促進文自動追加 -->
+    <section class="bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-3">
       <div class="flex items-center justify-between gap-2 flex-wrap">
         <label for="message-line2" class="text-xs sm:text-sm font-black text-white flex items-center gap-1.5">
           <span class="w-1.5 h-4 bg-amber-400 rounded-full"></span>
@@ -248,7 +299,25 @@
       <textarea id="message-line2" rows="2" oninput="onStateChange()"
         placeholder="2行目に入る意気込み・見どころ・振り返りコメント"
         class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-xs sm:text-sm font-bold text-amber-100 focus:outline-none focus:border-amber-400"></textarea>
-      <p class="text-[10px] text-slate-400">※「試合前 / 試合後」の選択や対戦相手・スコアに合わせて、押すたびに別候補を生成します。</p>
+
+      <!-- チャンネル登録・高評価・コメント促進文の自動追加 -->
+      <div class="pt-2.5 border-t border-slate-800 space-y-2">
+        <div class="flex items-center justify-between gap-2 flex-wrap">
+          <label class="inline-flex items-center gap-2 cursor-pointer select-none">
+            <input id="include-cta-checkbox" type="checkbox" checked onchange="onStateChange()"
+              class="w-4 h-4 rounded accent-amber-400 cursor-pointer">
+            <span class="text-xs font-black text-white">チャンネル登録・高評価・コメント促進文を自動追加</span>
+          </label>
+          <button type="button" onclick="cycleCtaTemplate()"
+            class="px-2.5 py-1 rounded-lg text-[11px] font-bold bg-slate-800 hover:bg-slate-700 text-amber-300 border border-slate-700 transition">
+            定型文を切替
+          </button>
+        </div>
+
+        <textarea id="cta-message-input" rows="2" oninput="onStateChange()"
+          placeholder="YouTubeチャンネル登録・高評価・コメントを促す一文"
+          class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-xs text-slate-200 focus:outline-none focus:border-amber-400"></textarea>
+      </div>
     </section>
 
     <!-- 5. 生成プレビュー＆Xポスト・コピー -->
@@ -302,13 +371,88 @@
     <div class="text-slate-500">Created by @syou0120</div>
   </footer>
 
+  <!-- 選手選択モーダル（ポジション・背番号・選手名） -->
+  <div id="player-picker-modal" class="fixed inset-0 z-50 hidden items-end sm:items-center justify-center bg-black/80 p-0 sm:p-4">
+    <div class="bg-slate-900 border-t sm:border border-slate-700 rounded-t-3xl sm:rounded-2xl w-full max-w-lg p-4 space-y-3 max-h-[85vh] flex flex-col">
+      <div class="flex items-center justify-between gap-2 shrink-0">
+        <div>
+          <h3 class="text-sm font-black text-white">MOM候補の選手を選択</h3>
+          <p id="picker-target-label" class="text-[11px] text-amber-300 font-bold">対象枠: ①</p>
+        </div>
+        <button type="button" onclick="closePlayerModal()" class="text-slate-400 hover:text-white text-lg font-bold px-2.5 py-1">✕</button>
+      </div>
+
+      <div class="flex items-center gap-1.5 flex-wrap shrink-0">
+        <button type="button" onclick="setPosFilter('ALL')" data-pos="ALL" class="pos-filter-btn px-2.5 py-1 rounded-lg text-xs font-bold border transition">ALL</button>
+        <button type="button" onclick="setPosFilter('GK')" data-pos="GK" class="pos-filter-btn px-2.5 py-1 rounded-lg text-xs font-bold border transition">GK</button>
+        <button type="button" onclick="setPosFilter('DF')" data-pos="DF" class="pos-filter-btn px-2.5 py-1 rounded-lg text-xs font-bold border transition">DF</button>
+        <button type="button" onclick="setPosFilter('MF')" data-pos="MF" class="pos-filter-btn px-2.5 py-1 rounded-lg text-xs font-bold border transition">MF</button>
+        <button type="button" onclick="setPosFilter('FW')" data-pos="FW" class="pos-filter-btn px-2.5 py-1 rounded-lg text-xs font-bold border transition">FW</button>
+      </div>
+
+      <input id="player-search" type="text" placeholder="背番号・選手名・ポジションで検索..." oninput="renderPlayerList()"
+        class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-xs text-white focus:outline-none focus:border-amber-400 shrink-0">
+
+      <div id="player-roster-list" class="overflow-y-auto space-y-1.5 pr-1 flex-1"></div>
+
+      <div class="pt-2 border-t border-slate-800 flex justify-between items-center shrink-0">
+        <button type="button" onclick="setOtherOption()" class="px-3 py-2 rounded-xl text-xs font-bold bg-slate-800 hover:bg-slate-700 text-amber-300 border border-slate-700 transition">
+          「チーム全員（リプ欄へ！）」を入れる
+        </button>
+        <button type="button" onclick="closePlayerModal()" class="px-4 py-2 rounded-xl text-xs font-black bg-amber-500 hover:bg-amber-400 text-slate-950 transition">
+          閉じる
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 定型4択 編集モーダル -->
+  <div id="preset-editor-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/80 p-4">
+    <div class="bg-slate-900 border border-slate-700 rounded-2xl w-full max-w-md p-4 space-y-3">
+      <div class="flex items-center justify-between">
+        <h3 class="text-sm font-black text-white">「定型4択を入れる」の内容を編集</h3>
+        <button type="button" onclick="closePresetEditor()" class="text-slate-400 hover:text-white text-lg font-bold px-2">✕</button>
+      </div>
+      <p class="text-[11px] text-slate-400">ここで設定した4択が「定型4択を入れる」ボタンでいつでも呼び出せます。</p>
+      <div class="space-y-2">
+        <input id="custom-preset-1" type="text" placeholder="定型 ①" class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-xs font-bold text-white focus:outline-none focus:border-amber-400">
+        <input id="custom-preset-2" type="text" placeholder="定型 ②" class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-xs font-bold text-white focus:outline-none focus:border-amber-400">
+        <input id="custom-preset-3" type="text" placeholder="定型 ③" class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-xs font-bold text-white focus:outline-none focus:border-amber-400">
+        <input id="custom-preset-4" type="text" placeholder="定型 ④" class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-xs font-bold text-white focus:outline-none focus:border-amber-400">
+      </div>
+      <div class="flex items-center justify-between gap-2 pt-2 border-t border-slate-800">
+        <button type="button" onclick="resetCustomPollPreset()" class="px-3 py-2 rounded-xl text-xs font-bold bg-slate-800 hover:bg-slate-700 text-slate-300">
+          初期値に戻す
+        </button>
+        <div class="flex items-center gap-2">
+          <button type="button" onclick="closePresetEditor()" class="px-3 py-2 rounded-xl text-xs font-bold bg-slate-800 text-slate-300">キャンセル</button>
+          <button type="button" onclick="saveCustomPollPreset()" class="px-4 py-2 rounded-xl text-xs font-black bg-amber-500 hover:bg-amber-400 text-slate-950">保存して適用</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- トースト通知 -->
   <div id="toast" class="fixed bottom-5 left-1/2 -translate-x-1/2 z-50 hidden px-4 py-2 rounded-full bg-slate-800 text-white text-xs font-bold border border-amber-400/50 shadow-xl whitespace-nowrap"></div>
 
 <script>
-const AUTO_SAVE_KEY = 'kashima_postmatch_poll_autosave_v2';
-const PRESETS_KEY = 'kashima_postmatch_poll_presets_v2';
+const AUTO_SAVE_KEY = 'kashima_mom_poll_autosave_v3';
+const PRESETS_KEY = 'kashima_mom_poll_presets_v3';
+const CUSTOM_POLL_PRESET_KEY = 'kashima_mom_custom_poll_preset_v1';
 const MAX_PRESETS = 5;
+
+const DEFAULT_CUSTOM_POLL = [
+  'FW #40 鈴木優磨',
+  'FW #9 レオ・セアラ',
+  'GK #1 早川友基',
+  'チーム全員（リプ欄へ！）'
+];
+
+const CTA_TEMPLATES = [
+  '📺 鹿syouチャンネルのチャンネル登録・高評価・コメントもぜひよろしくお願いします！🦌\nhttps://www.youtube.com/@syou0120',
+  '🔥 試合の感想やMOMへの熱いコメントもお待ちしてます！チャンネル登録・高評価もぜひ👍\nhttps://www.youtube.com/@syou0120',
+  '🦌 鹿島サポ仲間と盛り上がりましょう！高評価・コメント・チャンネル登録よろしくお願いします！\nhttps://www.youtube.com/@syou0120'
+];
 
 const J1_OTHER_CLUBS = [
   '水戸ホーリーホック',
@@ -332,8 +476,53 @@ const J1_OTHER_CLUBS = [
   'V・ファーレン長崎'
 ];
 
+const KASHIMA_PLAYERS = [
+  // GK
+  { number: 1, name: '早川友基', pos: 'GK' },
+  { number: 21, name: '山田大樹', pos: 'GK' },
+  { number: 29, name: '梶川裕嗣', pos: 'GK' },
+  { number: 31, name: '藤井陽登', pos: 'GK' },
+  // DF
+  { number: 2, name: '安西幸輝', pos: 'DF' },
+  { number: 3, name: 'キム・テヒョン', pos: 'DF' },
+  { number: 4, name: '千田海人', pos: 'DF' },
+  { number: 5, name: '関川郁万', pos: 'DF' },
+  { number: 7, name: '小川諒也', pos: 'DF' },
+  { number: 19, name: '大森渚生', pos: 'DF' },
+  { number: 23, name: '津久井佳佑', pos: 'DF' },
+  { number: 25, name: '小池龍太', pos: 'DF' },
+  { number: 28, name: '大川佑梧', pos: 'DF' },
+  { number: 32, name: '松本遥翔', pos: 'DF' },
+  { number: 35, name: '元砂晏翔仁ウデンバ', pos: 'DF' },
+  { number: 37, name: '広瀬隆斗', pos: 'DF' },
+  { number: 45, name: '倉橋幸輝', pos: 'DF' },
+  { number: 55, name: '植田直通', pos: 'DF' },
+  // MF
+  { number: 6, name: '三竿健斗', pos: 'MF' },
+  { number: 8, name: 'マテウス・ブエノ', pos: 'MF' },
+  { number: 10, name: '柴崎岳', pos: 'MF' },
+  { number: 14, name: '樋口雄太', pos: 'MF' },
+  { number: 24, name: '林晴己', pos: 'MF' },
+  { number: 27, name: '松村優太', pos: 'MF' },
+  { number: 42, name: '大貫琉偉', pos: 'MF' },
+  { number: 43, name: '福岡勇和', pos: 'MF' },
+  { number: 44, name: '平島大悟', pos: 'MF' },
+  { number: 46, name: '岩土そら', pos: 'MF' },
+  // FW
+  { number: 9, name: 'レオ・セアラ', pos: 'FW' },
+  { number: 11, name: '田川亨介', pos: 'FW' },
+  { number: 17, name: 'エウベル', pos: 'FW' },
+  { number: 18, name: 'ヤン・マテウス', pos: 'FW' },
+  { number: 30, name: '吉田湊海', pos: 'FW' },
+  { number: 34, name: '徳田誉', pos: 'FW' },
+  { number: 40, name: '鈴木優磨', pos: 'FW' },
+  { number: 47, name: '高木瑛人', pos: 'FW' },
+  { number: 48, name: '滝澤周生', pos: 'FW' },
+  { number: 77, name: 'チャヴリッチ', pos: 'FW' }
+];
+
 let state = {
-  timingMode: 'post', // 'pre' (試合前) or 'post' (試合後)
+  timingMode: 'post', // 'pre' or 'post'
   competition: '明治安田J1リーグ',
   venue: 'HOME',
   opponent: '浦和レッズ',
@@ -341,11 +530,17 @@ let state = {
   matchTime: '14:00',
   scoreKashima: '1',
   scoreOpponent: '0',
-  pollOpts: ['鈴木優磨', 'レオ・セアラ', '早川友基', 'チーム全員（リプ欄へ！）'],
+  pollOpts: [...DEFAULT_CUSTOM_POLL],
+  customPollPreset: [...DEFAULT_CUSTOM_POLL],
   messageLine2: '最後まで全員で走り抜いた価値ある勝点3！今日のMOMは誰？🔥',
+  includeCta: true,
+  ctaMessage: CTA_TEMPLATES[0],
+  ctaIndex: 0,
   aiTone: 'hot',
   aiIndex: 0,
   j1Open: false,
+  activePollSlot: 0,
+  posFilter: 'ALL',
   presets: []
 };
 
@@ -381,6 +576,13 @@ function loadSavedData() {
       if (!state.matchDate) state.matchDate = getTodayISO(0);
       if (state.timingMode !== 'pre' && state.timingMode !== 'post') state.timingMode = 'post';
     }
+    const cpRaw = localStorage.getItem(CUSTOM_POLL_PRESET_KEY);
+    if (cpRaw) {
+      const cpParsed = JSON.parse(cpRaw);
+      if (Array.isArray(cpParsed) && cpParsed.length === 4) {
+        state.customPollPreset = cpParsed;
+      }
+    }
     const pRaw = localStorage.getItem(PRESETS_KEY);
     if (pRaw) {
       const pParsed = JSON.parse(pRaw);
@@ -402,6 +604,8 @@ function saveAutoData() {
       scoreOpponent: state.scoreOpponent,
       pollOpts: state.pollOpts,
       messageLine2: state.messageLine2,
+      includeCta: state.includeCta,
+      ctaMessage: state.ctaMessage,
       aiTone: state.aiTone
     }));
   } catch (e) {}
@@ -419,6 +623,8 @@ function syncDOMFromState() {
   document.getElementById('poll-opt-3').value = state.pollOpts[2] || '';
   document.getElementById('poll-opt-4').value = state.pollOpts[3] || '';
   document.getElementById('message-line2').value = state.messageLine2;
+  document.getElementById('include-cta-checkbox').checked = Boolean(state.includeCta);
+  document.getElementById('cta-message-input').value = state.ctaMessage || '';
   document.getElementById('ai-tone').value = state.aiTone || 'hot';
 }
 
@@ -427,18 +633,6 @@ function setTimingMode(mode) {
   state.timingMode = mode;
   saveAutoData();
   renderUI();
-}
-
-function applyPollPreset() {
-  if (state.timingMode === 'pre') {
-    state.pollOpts = ['鹿島の勝利！', '完封（クリーンシート）勝利', '複数得点で快勝', '接戦をモノにする！'];
-  } else {
-    state.pollOpts = ['鈴木優磨', 'レオ・セアラ', '早川友基', 'チーム全員（リプ欄へ！）'];
-  }
-  syncDOMFromState();
-  saveAutoData();
-  renderUI();
-  showToast(state.timingMode === 'pre' ? '試合前アンケート定型を入れました' : '試合後MOM定型を入れました');
 }
 
 function onStateChange() {
@@ -455,10 +649,156 @@ function onStateChange() {
     document.getElementById('poll-opt-4').value
   ];
   state.messageLine2 = document.getElementById('message-line2').value;
+  state.includeCta = document.getElementById('include-cta-checkbox').checked;
+  state.ctaMessage = document.getElementById('cta-message-input').value;
   state.aiTone = document.getElementById('ai-tone').value;
 
   saveAutoData();
   renderUI();
+}
+
+// 選手ピッカーモーダル
+function openPlayerModal(slotIdx) {
+  state.activePollSlot = slotIdx;
+  const labels = ['①', '②', '③', '④'];
+  document.getElementById('picker-target-label').textContent = `対象枠: ${labels[slotIdx] || '①'}`;
+  renderPosFilterButtons();
+  renderPlayerList();
+  const modal = document.getElementById('player-picker-modal');
+  modal.classList.remove('hidden');
+  modal.classList.add('flex');
+}
+
+function closePlayerModal() {
+  const modal = document.getElementById('player-picker-modal');
+  modal.classList.add('hidden');
+  modal.classList.remove('flex');
+}
+
+function setPosFilter(pos) {
+  state.posFilter = pos;
+  renderPosFilterButtons();
+  renderPlayerList();
+}
+
+function renderPosFilterButtons() {
+  document.querySelectorAll('.pos-filter-btn').forEach(btn => {
+    const active = btn.dataset.pos === state.posFilter;
+    btn.className = `pos-filter-btn px-2.5 py-1 rounded-lg text-xs font-bold border transition ${
+      active
+        ? 'bg-amber-500 text-slate-950 border-amber-300'
+        : 'bg-slate-950 text-slate-300 border-slate-700 hover:border-slate-500'
+    }`;
+  });
+}
+
+function renderPlayerList() {
+  const list = document.getElementById('player-roster-list');
+  const q = (document.getElementById('player-search').value || '').trim().toLowerCase();
+
+  const filtered = KASHIMA_PLAYERS.filter(p => {
+    if (state.posFilter !== 'ALL' && p.pos !== state.posFilter) return false;
+    if (!q) return true;
+    return String(p.number).includes(q) || p.name.toLowerCase().includes(q) || p.pos.toLowerCase().includes(q);
+  });
+
+  list.innerHTML = filtered.map(p => {
+    const formatted = `${p.pos} #${p.number} ${p.name}`;
+    const encoded = encodeURIComponent(formatted);
+    return `
+      <button type="button" data-val-encoded="${encoded}" onclick="pickPlayerForSlot(this)"
+        class="w-full flex items-center justify-between gap-2 p-2.5 rounded-xl bg-slate-950 hover:bg-slate-800 border border-slate-800 hover:border-amber-400/60 text-left transition">
+        <div class="flex items-center gap-2 min-w-0">
+          <span class="text-[10px] font-black px-1.5 py-0.5 rounded bg-slate-800 text-amber-300 shrink-0">${p.pos}</span>
+          <span class="w-7 h-7 rounded-lg antlers-red text-white font-num text-xs font-black flex items-center justify-center shrink-0">${p.number}</span>
+          <span class="text-xs sm:text-sm font-bold text-white truncate">${p.name}</span>
+        </div>
+        <span class="text-[11px] font-bold text-slate-400 shrink-0">選択 →</span>
+      </button>
+    `;
+  }).join('');
+}
+
+function pickPlayerForSlot(btn) {
+  const val = decodeURIComponent(btn.dataset.valEncoded);
+  const idx = state.activePollSlot;
+  state.pollOpts[idx] = val;
+  document.getElementById(`poll-opt-${idx + 1}`).value = val;
+  saveAutoData();
+  renderUI();
+  closePlayerModal();
+  showToast(`「${val}」をセットしました`);
+}
+
+function setOtherOption() {
+  const idx = state.activePollSlot;
+  const val = 'チーム全員（リプ欄へ！）';
+  state.pollOpts[idx] = val;
+  document.getElementById(`poll-opt-${idx + 1}`).value = val;
+  saveAutoData();
+  renderUI();
+  closePlayerModal();
+}
+
+// 定型4択の適用・編集
+function applyPollPreset() {
+  state.pollOpts = [...state.customPollPreset];
+  syncDOMFromState();
+  saveAutoData();
+  renderUI();
+  showToast('定型4択を入れました');
+}
+
+function openPresetEditor() {
+  document.getElementById('custom-preset-1').value = state.customPollPreset[0] || '';
+  document.getElementById('custom-preset-2').value = state.customPollPreset[1] || '';
+  document.getElementById('custom-preset-3').value = state.customPollPreset[2] || '';
+  document.getElementById('custom-preset-4').value = state.customPollPreset[3] || '';
+  const modal = document.getElementById('preset-editor-modal');
+  modal.classList.remove('hidden');
+  modal.classList.add('flex');
+}
+
+function closePresetEditor() {
+  const modal = document.getElementById('preset-editor-modal');
+  modal.classList.add('hidden');
+  modal.classList.remove('flex');
+}
+
+function saveCustomPollPreset() {
+  state.customPollPreset = [
+    document.getElementById('custom-preset-1').value,
+    document.getElementById('custom-preset-2').value,
+    document.getElementById('custom-preset-3').value,
+    document.getElementById('custom-preset-4').value
+  ];
+  try {
+    localStorage.setItem(CUSTOM_POLL_PRESET_KEY, JSON.stringify(state.customPollPreset));
+  } catch (e) {}
+  applyPollPreset();
+  closePresetEditor();
+  showToast('定型4択を保存して適用しました');
+}
+
+function resetCustomPollPreset() {
+  state.customPollPreset = [...DEFAULT_CUSTOM_POLL];
+  document.getElementById('custom-preset-1').value = DEFAULT_CUSTOM_POLL[0];
+  document.getElementById('custom-preset-2').value = DEFAULT_CUSTOM_POLL[1];
+  document.getElementById('custom-preset-3').value = DEFAULT_CUSTOM_POLL[2];
+  document.getElementById('custom-preset-4').value = DEFAULT_CUSTOM_POLL[3];
+  showToast('初期の定型4択に戻しました');
+}
+
+// CTA（チャンネル登録・高評価・コメント促進文）切替
+function cycleCtaTemplate() {
+  state.ctaIndex = (state.ctaIndex + 1) % CTA_TEMPLATES.length;
+  state.ctaMessage = CTA_TEMPLATES[state.ctaIndex];
+  state.includeCta = true;
+  document.getElementById('include-cta-checkbox').checked = true;
+  document.getElementById('cta-message-input').value = state.ctaMessage;
+  saveAutoData();
+  renderUI();
+  showToast('促進文の定型を切り替えました');
 }
 
 function setCompetition(btn) {
@@ -502,40 +842,35 @@ function setNextWeekend(targetDay) {
   setQuickDate(diff);
 }
 
-// 試合前・試合後モード対応のAIメッセージ自動生成
+// 試合前・試合後ともにMOMベースのAIメッセージ生成
 function generateAIMessage() {
   const opp = (state.opponent || '相手').trim();
   const comp = (state.competition || '試合').trim();
   const tone = document.getElementById('ai-tone').value;
   const isHome = state.venue === 'HOME';
-  const p1 = (state.pollOpts[0] || '').trim();
-  const p2 = (state.pollOpts[1] || '').trim();
 
   const candidates = [];
 
   if (state.timingMode === 'pre') {
-    // 試合前モード
     if (tone === 'highlight') {
       candidates.push(
-        `${opp}戦の見どころは中盤の主導権争いと球際！今日のカギを握るキーマンは誰？⚽`,
-        `${p1 && p2 ? `${p1}や${p2}の決定力` : '鹿島らしい堅守速攻'}に注目！勝負を分けるポイントは？🔥`,
-        `${isHome ? 'ホームの利' : 'アウェイでの戦い方'}を活かして${opp}攻略へ！注目選手に投票しよう🦌`
+        `${opp}戦の見どころは中盤の主導権争いと球際！今日のMOM候補・キーマンは誰だと思う？⚽`,
+        `${isHome ? 'カシマスタジアム' : 'アウェイ'}での${opp}戦！勝利の立役者（MOM）になりそうな選手に投票しよう🦌`,
+        `${comp}・${opp}戦！攻守のカギを握り、今日のMOMに輝くと思う選手は誰？🔥`
       );
     } else if (tone === 'simple') {
       candidates.push(
-        `まもなく${opp}戦キックオフ！今日の試合展開・注目ポイントをみんなで予想しよう🦌`,
-        `${comp}・${opp}戦！勝利を信じて全力応援！あなたの注目は？🔥`
+        `まもなく${opp}戦キックオフ！今日のMOM（マン・オブ・ザ・マッチ）になりそうな選手に投票しよう🦌`,
+        `今日の${opp}戦で一番活躍を期待するMOM候補は誰ですか？リプ欄でも教えてください👇`
       );
     } else {
-      // hot（熱いサポ風）
       candidates.push(
-        `${isHome ? '聖地カシマ' : 'アウェイの地'}で${opp}撃破へ！勝利あるのみ、みんなの意気込みを聞かせてくれ！🔥🦌`,
-        `絶対に負けられない${opp}戦！鹿島の誇りを胸に勝点3を掴み取ろう！⚡`,
-        `キックオフ目前！${opp}を圧倒して最高の週末にしよう！今日の注目は？👊`
+        `${isHome ? '聖地カシマ' : 'アウェイの地'}で${opp}撃破へ！勝利へ導く今日のMOMは誰だ！？🔥🦌`,
+        `絶対に負けられない${opp}戦！一番の活躍を期待するMOM候補に一票を！⚡`,
+        `キックオフ目前！${opp}を圧倒してMOMに輝くヒーローは誰になる！？👊`
       );
     }
   } else {
-    // 試合後モード
     const k = state.scoreKashima;
     const o = state.scoreOpponent;
     let outcome = 'neutral';
@@ -549,45 +884,44 @@ function generateAIMessage() {
       if (outcome === 'win') {
         candidates.push(
           `攻守の切り替えと球際の強さで${opp}を圧倒！今日の勝利の立役者（MOM）は誰？⚽`,
-          `${k}-${o}の快勝！${p1 ? p1 + 'らの活躍' : 'チーム全体の連動'}が光った一戦、一番輝いた選手は？✨`
+          `${k}-${o}の快勝！チーム全体の連動が光った一戦、今日のMOMにふさわしい選手は？✨`
         );
       } else if (outcome === 'draw') {
         candidates.push(
-          `一進一退の攻防となった${opp}戦！苦しい展開の中で最も存在感を放った選手は？🔥`,
-          `勝点1を分け合った${opp}戦。次につながるプレーを見せた今日のMVPは誰？👏`
+          `一進一退の攻防となった${opp}戦！苦しい展開の中で最も存在感を放ったMOMは誰？🔥`,
+          `勝点1を分け合った${opp}戦。次につながるプレーを見せた今日のMOMは誰？👏`
         );
       } else if (outcome === 'lose') {
         candidates.push(
-          `悔しい敗戦となった${opp}戦。それでも最後まで戦う姿勢を見せた選手に一票を！🦌`,
+          `悔しい敗戦となった${opp}戦。それでも最後まで戦う姿勢を見せた今日のMOMに一票を！🦌`,
           `課題を次節へ繋げよう！${opp}戦で最も気持ちを前面に出していた選手は誰？🔥`
         );
       } else {
         candidates.push(
-          `${opp}戦お疲れさまでした！今日の試合で最も印象に残った選手（MOM）に投票しよう⚽`
+          `${opp}戦お疲れさまでした！今日の試合で最も印象に残ったMOMに投票しよう⚽`
         );
       }
     } else if (tone === 'simple') {
       candidates.push(
         `${opp}戦お疲れさまでした！今日のマン・オブ・ザ・マッチ（MOM）に投票お願いします🦌`,
-        `今日の${opp}戦で一番輝いていたと思う選手に一票を！感想はリプ欄へ👇`
+        `今日の${opp}戦で一番輝いていたと思うMOMに一票を！感想はリプ欄へ👇`
       );
     } else {
-      // hot（熱いサポ風）
       if (outcome === 'win') {
         candidates.push(
           `やったぞ鹿島！！${opp}に${k}-${o}で勝利！今日のMOMは誰だ！？🔥🦌`,
-          `最高の結果！${isHome ? 'カシマ' : 'アウェイ'}で掴み取った勝点3、一番輝いていた選手に投票しよう！⚡`,
-          `全員のハードワークで${opp}撃破！勝利の立役者だと思う選手を教えて！🙌`
+          `最高の結果！${isHome ? 'カシマ' : 'アウェイ'}で掴み取った勝点3、今日のMOMに投票しよう！⚡`,
+          `全員のハードワークで${opp}撃破！勝利の立役者（MOM）だと思う選手を教えて！🙌`
         );
       } else if (outcome === 'draw') {
         candidates.push(
           `激闘の${opp}戦は${k}-${o}のドロー！最後まで走り抜いた今日のMOMは誰？🔥`,
-          `勝点1を死守！${opp}相手に気持ちを見せた今日のMVPを選ぼう！🦌`
+          `勝点1を死守！${opp}相手に気持ちを見せた今日のMOMを選ぼう！🦌`
         );
       } else if (outcome === 'lose') {
         candidates.push(
-          `悔しい結果だけど前を向こう！${opp}戦で最後まで闘志を見せた選手は誰？🔥`,
-          `次こそ必ず勝つ！今日の${opp}戦で一番ファイトしていた選手に一票を！🦌`
+          `悔しい結果だけど前を向こう！${opp}戦で最後まで闘志を見せた今日のMOMは誰？🔥`,
+          `次こそ必ず勝つ！今日の${opp}戦で一番ファイトしていたMOM候補に一票を！🦌`
         );
       } else {
         candidates.push(
@@ -616,7 +950,7 @@ function buildPostText() {
   const hasScore = !isPre && k !== '' && o !== '';
   const venueLabel = state.venue === 'HOME' ? 'HOME' : 'AWAY';
 
-  // 1行目：試合前 / 試合後ラベル＋大会・日時・対戦（・スコア）
+  // 1行目
   const modeTag = isPre ? '【試合前】' : '【試合終了】';
   let line1 = `🦌${modeTag}${comp ? comp + ' ' : ''}${dtStr ? dtStr + ' ' : ''}`;
   if (opp) {
@@ -628,16 +962,20 @@ function buildPostText() {
   // 2行目：意気込み・見どころメッセージ
   const line2 = (state.messageLine2 || '').trim();
 
-  // アンケート選択肢一覧
+  // チャンネル登録・高評価・コメント促進文
+  const ctaText = state.includeCta ? (state.ctaMessage || '').trim() : '';
+
+  // アンケート4択
   const opts = state.pollOpts
     .map((v, i) => v.trim() ? `${['①', '②', '③', '④'][i]} ${v.trim()}` : '')
     .filter(Boolean);
 
-  const pollHeading = isPre ? '📊 試合前アンケート4択' : '📊 今日のMOMアンケート4択';
+  const pollHeading = isPre ? '📊 期待のMOMアンケート4択' : '📊 今日のMOMアンケート4択';
 
   return [
     line1.trim(),
     line2,
+    ctaText ? `\n${ctaText}` : '',
     opts.length ? `\n${pollHeading}\n${opts.join('\n')}` : '',
     `\n#鹿島アントラーズ #antlers`
   ].filter(Boolean).join('\n');
@@ -666,13 +1004,20 @@ function renderUI() {
   const pollLabel = document.getElementById('poll-label');
   if (isPre) {
     scoreBox.classList.add('hidden');
-    sec3Title.textContent = '3. 試合前アンケート4択';
-    pollLabel.textContent = 'Xアンケート4択（勝敗予想・注目選手・注目ポイント）';
+    sec3Title.textContent = '3. 期待のMOMアンケート4択';
+    pollLabel.textContent = 'Xアンケート4択（期待のMOM候補）';
   } else {
     scoreBox.classList.remove('hidden');
-    sec3Title.textContent = '3. スコア＆MOMアンケート候補';
-    pollLabel.textContent = 'Xアンケート4択（今日のMOM・印象に残った選手）';
+    sec3Title.textContent = '3. スコア＆今日のMOMアンケート4択';
+    pollLabel.textContent = 'Xアンケート4択（今日のMOM候補）';
   }
+
+  // CTAテキストエリアの有効/無効視覚表示
+  const ctaArea = document.getElementById('cta-message-input');
+  ctaArea.disabled = !state.includeCta;
+  ctaArea.className = `w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-xs focus:outline-none focus:border-amber-400 ${
+    state.includeCta ? 'text-slate-200' : 'text-slate-600 opacity-50'
+  }`;
 
   // 大会ボタンハイライト
   document.querySelectorAll('.comp-btn').forEach(btn => {
@@ -758,6 +1103,8 @@ function saveCurrentPreset() {
       scoreOpponent: state.scoreOpponent,
       pollOpts: [...state.pollOpts],
       messageLine2: state.messageLine2,
+      includeCta: state.includeCta,
+      ctaMessage: state.ctaMessage,
       aiTone: state.aiTone
     }
   };
@@ -811,7 +1158,6 @@ function renderSavedPresets() {
 }
 
 function resetForm() {
-  state.timingMode = 'pre';
   state.competition = '明治安田J1リーグ';
   state.venue = 'HOME';
   state.opponent = '';
@@ -819,7 +1165,7 @@ function resetForm() {
   state.matchTime = '14:00';
   state.scoreKashima = '';
   state.scoreOpponent = '';
-  state.pollOpts = ['鹿島の勝利！', '完封（クリーンシート）勝利', '複数得点で快勝', '接戦をモノにする！'];
+  state.pollOpts = [...state.customPollPreset];
   state.messageLine2 = '';
   syncDOMFromState();
   saveAutoData();
