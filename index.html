@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>鹿島アントラーズ 試合後アンケート＆ポスト作成メーカー</title>
+<title>鹿島アントラーズ 試合前・試合後ポスト＆アンケート作成メーカー</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&family=Noto+Sans+JP:wght@400;500;700;800;900&display=swap" rel="stylesheet">
 <style>
@@ -15,9 +15,6 @@
   }
   .antlers-header {
     background: linear-gradient(90deg, #991b1b 0%, #7f1d1d 55%, #450a0a 100%);
-  }
-  .antlers-red {
-    background: linear-gradient(135deg, #b91c1c 0%, #7f1d1d 100%);
   }
   input[type="date"]::-webkit-calendar-picker-indicator {
     filter: invert(1);
@@ -31,7 +28,7 @@
   <header class="antlers-header border-b border-amber-400/30 sticky top-0 z-30">
     <div class="max-w-3xl mx-auto px-4 py-2.5 flex items-center justify-between gap-2">
       <div class="min-w-0">
-        <h1 class="text-sm sm:text-base font-black tracking-tight text-white truncate">試合後アンケート＆ポスト作成メーカー</h1>
+        <h1 class="text-sm sm:text-base font-black tracking-tight text-white truncate">試合前・後ポスト＆アンケート作成</h1>
         <p class="text-[10px] text-amber-200/85 truncate">鹿島アントラーズ · Created by @syou0120</p>
       </div>
       <div class="flex items-center gap-1.5 shrink-0">
@@ -48,6 +45,20 @@
   </header>
 
   <main class="max-w-3xl mx-auto px-4 pt-4 space-y-4">
+
+    <!-- 0. 試合前 / 試合後 モード切替 -->
+    <section class="bg-slate-900 border border-slate-800 rounded-2xl p-3">
+      <div class="grid grid-cols-2 gap-2">
+        <button type="button" id="mode-pre-btn" onclick="setTimingMode('pre')"
+          class="py-2.5 px-3 rounded-xl text-xs sm:text-sm font-black border transition flex items-center justify-center gap-1.5">
+          <span>🔥 試合前ポスト</span>
+        </button>
+        <button type="button" id="mode-post-btn" onclick="setTimingMode('post')"
+          class="py-2.5 px-3 rounded-xl text-xs sm:text-sm font-black border transition flex items-center justify-center gap-1.5">
+          <span>📊 試合後ポスト</span>
+        </button>
+      </div>
+    </section>
 
     <!-- 1. 試合情報（大会・対戦相手・ホーム/アウェイ） -->
     <section class="bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-3">
@@ -151,14 +162,15 @@
       </div>
     </section>
 
-    <!-- 3. 試合結果・MOM候補（ポスト＆アンケート用） -->
+    <!-- 3. スコア（試合後のみ表示）＆アンケート4択 -->
     <section class="bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-3">
-      <h2 class="text-xs sm:text-sm font-black text-white flex items-center gap-1.5">
+      <h2 id="section3-heading" class="text-xs sm:text-sm font-black text-white flex items-center gap-1.5">
         <span class="w-1.5 h-4 bg-red-600 rounded-full"></span>
-        <span>3. スコア＆MOMアンケート候補</span>
+        <span id="section3-title">3. スコア＆MOMアンケート候補</span>
       </h2>
 
-      <div class="grid grid-cols-3 gap-2 items-end">
+      <!-- スコア（試合後モードのみ表示） -->
+      <div id="score-box" class="grid grid-cols-3 gap-2 items-end">
         <div class="space-y-1">
           <label for="score-kashima" class="text-[11px] font-bold text-amber-300">鹿島 得点</label>
           <select id="score-kashima" onchange="onStateChange()"
@@ -192,17 +204,22 @@
         </div>
       </div>
 
-      <!-- アンケート4択（MOM候補） -->
+      <!-- アンケート4択 -->
       <div class="space-y-1.5 pt-1">
-        <label class="text-[11px] font-bold text-slate-400">Xアンケート4択（今日のMOM・印象に残った選手）</label>
+        <div class="flex items-center justify-between gap-2">
+          <label id="poll-label" class="text-[11px] font-bold text-slate-400">Xアンケート4択（今日のMOM・印象に残った選手）</label>
+          <button type="button" onclick="applyPollPreset()" class="text-[11px] font-bold text-amber-300 underline shrink-0">
+            定型4択を入れる
+          </button>
+        </div>
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
-          <input id="poll-opt-1" type="text" value="鈴木優磨" placeholder="選択肢1（例: 鈴木優磨）" oninput="onStateChange()"
+          <input id="poll-opt-1" type="text" value="鈴木優磨" placeholder="選択肢1" oninput="onStateChange()"
             class="px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-xs font-bold text-white focus:outline-none focus:border-amber-400">
-          <input id="poll-opt-2" type="text" value="レオ・セアラ" placeholder="選択肢2（例: レオ・セアラ）" oninput="onStateChange()"
+          <input id="poll-opt-2" type="text" value="レオ・セアラ" placeholder="選択肢2" oninput="onStateChange()"
             class="px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-xs font-bold text-white focus:outline-none focus:border-amber-400">
-          <input id="poll-opt-3" type="text" value="早川友基" placeholder="選択肢3（例: 早川友基）" oninput="onStateChange()"
+          <input id="poll-opt-3" type="text" value="早川友基" placeholder="選択肢3" oninput="onStateChange()"
             class="px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-xs font-bold text-white focus:outline-none focus:border-amber-400">
-          <input id="poll-opt-4" type="text" value="チーム全員（リプ欄へ！）" placeholder="選択肢4（例: チーム全員）" oninput="onStateChange()"
+          <input id="poll-opt-4" type="text" value="チーム全員（リプ欄へ！）" placeholder="選択肢4" oninput="onStateChange()"
             class="px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-xs font-bold text-white focus:outline-none focus:border-amber-400">
         </div>
       </div>
@@ -219,7 +236,7 @@
           <select id="ai-tone" class="px-2 py-1.5 rounded-lg bg-slate-950 border border-slate-700 text-[11px] font-bold text-slate-200 focus:outline-none focus:border-amber-400">
             <option value="hot">熱いサポ風</option>
             <option value="highlight">見どころ・戦術風</option>
-            <option value="prematch">試合前ワクワク風</option>
+            <option value="simple">シンプル・呼びかけ風</option>
           </select>
           <button type="button" onclick="generateAIMessage()"
             class="px-3 py-1.5 rounded-lg text-xs font-black bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 text-slate-950 shadow transition flex items-center gap-1">
@@ -231,7 +248,7 @@
       <textarea id="message-line2" rows="2" oninput="onStateChange()"
         placeholder="2行目に入る意気込み・見どころ・振り返りコメント"
         class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-xs sm:text-sm font-bold text-amber-100 focus:outline-none focus:border-amber-400"></textarea>
-      <p class="text-[10px] text-slate-400">※「✨ AIで自動生成」を押すたびに、対戦相手・スコア・MOM候補を踏まえた別バリエーションに切り替わります。</p>
+      <p class="text-[10px] text-slate-400">※「試合前 / 試合後」の選択や対戦相手・スコアに合わせて、押すたびに別候補を生成します。</p>
     </section>
 
     <!-- 5. 生成プレビュー＆Xポスト・コピー -->
@@ -289,8 +306,8 @@
   <div id="toast" class="fixed bottom-5 left-1/2 -translate-x-1/2 z-50 hidden px-4 py-2 rounded-full bg-slate-800 text-white text-xs font-bold border border-amber-400/50 shadow-xl whitespace-nowrap"></div>
 
 <script>
-const AUTO_SAVE_KEY = 'kashima_postmatch_poll_autosave_v1';
-const PRESETS_KEY = 'kashima_postmatch_poll_presets_v1';
+const AUTO_SAVE_KEY = 'kashima_postmatch_poll_autosave_v2';
+const PRESETS_KEY = 'kashima_postmatch_poll_presets_v2';
 const MAX_PRESETS = 5;
 
 const J1_OTHER_CLUBS = [
@@ -316,6 +333,7 @@ const J1_OTHER_CLUBS = [
 ];
 
 let state = {
+  timingMode: 'post', // 'pre' (試合前) or 'post' (試合後)
   competition: '明治安田J1リーグ',
   venue: 'HOME',
   opponent: '浦和レッズ',
@@ -361,6 +379,7 @@ function loadSavedData() {
       const parsed = JSON.parse(raw);
       Object.assign(state, parsed);
       if (!state.matchDate) state.matchDate = getTodayISO(0);
+      if (state.timingMode !== 'pre' && state.timingMode !== 'post') state.timingMode = 'post';
     }
     const pRaw = localStorage.getItem(PRESETS_KEY);
     if (pRaw) {
@@ -373,6 +392,7 @@ function loadSavedData() {
 function saveAutoData() {
   try {
     localStorage.setItem(AUTO_SAVE_KEY, JSON.stringify({
+      timingMode: state.timingMode,
       competition: state.competition,
       venue: state.venue,
       opponent: state.opponent,
@@ -400,6 +420,25 @@ function syncDOMFromState() {
   document.getElementById('poll-opt-4').value = state.pollOpts[3] || '';
   document.getElementById('message-line2').value = state.messageLine2;
   document.getElementById('ai-tone').value = state.aiTone || 'hot';
+}
+
+function setTimingMode(mode) {
+  if (mode !== 'pre' && mode !== 'post') return;
+  state.timingMode = mode;
+  saveAutoData();
+  renderUI();
+}
+
+function applyPollPreset() {
+  if (state.timingMode === 'pre') {
+    state.pollOpts = ['鹿島の勝利！', '完封（クリーンシート）勝利', '複数得点で快勝', '接戦をモノにする！'];
+  } else {
+    state.pollOpts = ['鈴木優磨', 'レオ・セアラ', '早川友基', 'チーム全員（リプ欄へ！）'];
+  }
+  syncDOMFromState();
+  saveAutoData();
+  renderUI();
+  showToast(state.timingMode === 'pre' ? '試合前アンケート定型を入れました' : '試合後MOM定型を入れました');
 }
 
 function onStateChange() {
@@ -463,77 +502,98 @@ function setNextWeekend(targetDay) {
   setQuickDate(diff);
 }
 
-// AI風メッセージ自動生成（API不要・状況別バリエーション）
+// 試合前・試合後モード対応のAIメッセージ自動生成
 function generateAIMessage() {
   const opp = (state.opponent || '相手').trim();
   const comp = (state.competition || '試合').trim();
   const tone = document.getElementById('ai-tone').value;
-  const k = state.scoreKashima;
-  const o = state.scoreOpponent;
+  const isHome = state.venue === 'HOME';
   const p1 = (state.pollOpts[0] || '').trim();
   const p2 = (state.pollOpts[1] || '').trim();
-  const isHome = state.venue === 'HOME';
-
-  let outcome = 'neutral';
-  if (k !== '' && o !== '') {
-    if (Number(k) > Number(o)) outcome = 'win';
-    else if (Number(k) < Number(o)) outcome = 'lose';
-    else outcome = 'draw';
-  }
 
   const candidates = [];
 
-  if (tone === 'prematch') {
-    candidates.push(
-      `${isHome ? '聖地カシマ' : 'アウェイの地'}で${opp}撃破へ！今日の注目選手・期待するキーマンは誰？🔥`,
-      `${comp}・${opp}戦！勝利あるのみ、あなたが一番期待している選手に投票しよう🦌⚡`,
-      `キックオフ目前！${opp}戦の勝負を分けるキーマンは誰になると思う？👊`
-    );
-  } else if (tone === 'highlight') {
-    if (outcome === 'win') {
+  if (state.timingMode === 'pre') {
+    // 試合前モード
+    if (tone === 'highlight') {
       candidates.push(
-        `攻守の切り替えと球際の強さで${opp}を圧倒！今日の勝利の立役者（MOM）は誰？⚽`,
-        `${k}-${o}の快勝！${p1 ? p1 + 'らの活躍' : 'チーム全体の連動'}が光った一戦、一番輝いた選手は？✨`
+        `${opp}戦の見どころは中盤の主導権争いと球際！今日のカギを握るキーマンは誰？⚽`,
+        `${p1 && p2 ? `${p1}や${p2}の決定力` : '鹿島らしい堅守速攻'}に注目！勝負を分けるポイントは？🔥`,
+        `${isHome ? 'ホームの利' : 'アウェイでの戦い方'}を活かして${opp}攻略へ！注目選手に投票しよう🦌`
       );
-    } else if (outcome === 'draw') {
+    } else if (tone === 'simple') {
       candidates.push(
-        `一進一退の攻防となった${opp}戦！苦しい展開の中で最も存在感を放った選手は？🔥`,
-        `勝点1を分け合った${opp}戦。次につながるプレーを見せた今日のMVPは誰？👏`
-      );
-    } else if (outcome === 'lose') {
-      candidates.push(
-        `悔しい敗戦となった${opp}戦。それでも最後まで戦う姿勢を見せた選手に一票を！🦌`,
-        `課題を次節へ繋げよう！${opp}戦で最も気持ちを前面に出していた選手は誰？🔥`
+        `まもなく${opp}戦キックオフ！今日の試合展開・注目ポイントをみんなで予想しよう🦌`,
+        `${comp}・${opp}戦！勝利を信じて全力応援！あなたの注目は？🔥`
       );
     } else {
+      // hot（熱いサポ風）
       candidates.push(
-        `${opp}戦の見どころは中盤の主導権争い！今日のカギを握る選手は誰だと思う？⚽`,
-        `${p1 && p2 ? `${p1}や${p2}の仕掛け` : '鹿島らしい堅守速攻'}に注目！今日のキーマンは誰？🔥`
+        `${isHome ? '聖地カシマ' : 'アウェイの地'}で${opp}撃破へ！勝利あるのみ、みんなの意気込みを聞かせてくれ！🔥🦌`,
+        `絶対に負けられない${opp}戦！鹿島の誇りを胸に勝点3を掴み取ろう！⚡`,
+        `キックオフ目前！${opp}を圧倒して最高の週末にしよう！今日の注目は？👊`
       );
     }
   } else {
-    // hot（熱いサポ風）
-    if (outcome === 'win') {
+    // 試合後モード
+    const k = state.scoreKashima;
+    const o = state.scoreOpponent;
+    let outcome = 'neutral';
+    if (k !== '' && o !== '') {
+      if (Number(k) > Number(o)) outcome = 'win';
+      else if (Number(k) < Number(o)) outcome = 'lose';
+      else outcome = 'draw';
+    }
+
+    if (tone === 'highlight') {
+      if (outcome === 'win') {
+        candidates.push(
+          `攻守の切り替えと球際の強さで${opp}を圧倒！今日の勝利の立役者（MOM）は誰？⚽`,
+          `${k}-${o}の快勝！${p1 ? p1 + 'らの活躍' : 'チーム全体の連動'}が光った一戦、一番輝いた選手は？✨`
+        );
+      } else if (outcome === 'draw') {
+        candidates.push(
+          `一進一退の攻防となった${opp}戦！苦しい展開の中で最も存在感を放った選手は？🔥`,
+          `勝点1を分け合った${opp}戦。次につながるプレーを見せた今日のMVPは誰？👏`
+        );
+      } else if (outcome === 'lose') {
+        candidates.push(
+          `悔しい敗戦となった${opp}戦。それでも最後まで戦う姿勢を見せた選手に一票を！🦌`,
+          `課題を次節へ繋げよう！${opp}戦で最も気持ちを前面に出していた選手は誰？🔥`
+        );
+      } else {
+        candidates.push(
+          `${opp}戦お疲れさまでした！今日の試合で最も印象に残った選手（MOM）に投票しよう⚽`
+        );
+      }
+    } else if (tone === 'simple') {
       candidates.push(
-        `やったぞ鹿島！！${opp}に${k}-${o}で勝利！今日のMOMは誰だ！？🔥🦌`,
-        `最高の結果！${isHome ? 'カシマ' : 'アウェイ'}で掴み取った勝点3、一番輝いていた選手に投票しよう！⚡`,
-        `全員のハードワークで${opp}撃破！勝利の立役者だと思う選手を教えて！🙌`
-      );
-    } else if (outcome === 'draw') {
-      candidates.push(
-        `激闘の${opp}戦は${k}-${o}のドロー！最後まで走り抜いた今日のMOMは誰？🔥`,
-        `勝点1を死守！${opp}相手に気持ちを見せた今日のMVPを選ぼう！🦌`
-      );
-    } else if (outcome === 'lose') {
-      candidates.push(
-        `悔しい結果だけど前を向こう！${opp}戦で最後まで闘志を見せた選手は誰？🔥`,
-        `次こそ必ず勝つ！今日の${opp}戦で一番ファイトしていた選手に一票を！🦌`
+        `${opp}戦お疲れさまでした！今日のマン・オブ・ザ・マッチ（MOM）に投票お願いします🦌`,
+        `今日の${opp}戦で一番輝いていたと思う選手に一票を！感想はリプ欄へ👇`
       );
     } else {
-      candidates.push(
-        `絶対に負けられない${opp}戦！勝利へ導く今日のヒーローは誰だ！？🔥🦌`,
-        `鹿島の誇りを胸に${opp}を倒そう！一番活躍を期待する選手は誰？⚡`
-      );
+      // hot（熱いサポ風）
+      if (outcome === 'win') {
+        candidates.push(
+          `やったぞ鹿島！！${opp}に${k}-${o}で勝利！今日のMOMは誰だ！？🔥🦌`,
+          `最高の結果！${isHome ? 'カシマ' : 'アウェイ'}で掴み取った勝点3、一番輝いていた選手に投票しよう！⚡`,
+          `全員のハードワークで${opp}撃破！勝利の立役者だと思う選手を教えて！🙌`
+        );
+      } else if (outcome === 'draw') {
+        candidates.push(
+          `激闘の${opp}戦は${k}-${o}のドロー！最後まで走り抜いた今日のMOMは誰？🔥`,
+          `勝点1を死守！${opp}相手に気持ちを見せた今日のMVPを選ぼう！🦌`
+        );
+      } else if (outcome === 'lose') {
+        candidates.push(
+          `悔しい結果だけど前を向こう！${opp}戦で最後まで闘志を見せた選手は誰？🔥`,
+          `次こそ必ず勝つ！今日の${opp}戦で一番ファイトしていた選手に一票を！🦌`
+        );
+      } else {
+        candidates.push(
+          `激闘の${opp}戦！最後まで戦い抜いた今日のMOMは誰だ！？🔥🦌`
+        );
+      }
     }
   }
 
@@ -547,16 +607,18 @@ function generateAIMessage() {
 }
 
 function buildPostText() {
+  const isPre = state.timingMode === 'pre';
   const comp = (state.competition || '').trim();
   const opp = (state.opponent || '').trim();
   const dtStr = formatJapaneseDateTime(state.matchDate, state.matchTime);
   const k = state.scoreKashima;
   const o = state.scoreOpponent;
-  const hasScore = k !== '' && o !== '';
+  const hasScore = !isPre && k !== '' && o !== '';
   const venueLabel = state.venue === 'HOME' ? 'HOME' : 'AWAY';
 
-  // 1行目：大会・日時・対戦・スコア
-  let line1 = `🦌${comp ? comp + ' ' : ''}${dtStr ? dtStr + ' ' : ''}`;
+  // 1行目：試合前 / 試合後ラベル＋大会・日時・対戦（・スコア）
+  const modeTag = isPre ? '【試合前】' : '【試合終了】';
+  let line1 = `🦌${modeTag}${comp ? comp + ' ' : ''}${dtStr ? dtStr + ' ' : ''}`;
   if (opp) {
     line1 += hasScore ? `vs ${opp}（${venueLabel}） ${k}-${o}` : `vs ${opp}（${venueLabel}）`;
   } else if (hasScore) {
@@ -571,15 +633,47 @@ function buildPostText() {
     .map((v, i) => v.trim() ? `${['①', '②', '③', '④'][i]} ${v.trim()}` : '')
     .filter(Boolean);
 
+  const pollHeading = isPre ? '📊 試合前アンケート4択' : '📊 今日のMOMアンケート4択';
+
   return [
     line1.trim(),
     line2,
-    opts.length ? `\n📊 Xアンケート4択\n${opts.join('\n')}` : '',
+    opts.length ? `\n${pollHeading}\n${opts.join('\n')}` : '',
     `\n#鹿島アントラーズ #antlers`
   ].filter(Boolean).join('\n');
 }
 
 function renderUI() {
+  const isPre = state.timingMode === 'pre';
+
+  // 試合前 / 試合後ボタンハイライト
+  const preBtn = document.getElementById('mode-pre-btn');
+  const postBtn = document.getElementById('mode-post-btn');
+  preBtn.className = `py-2.5 px-3 rounded-xl text-xs sm:text-sm font-black border transition flex items-center justify-center gap-1.5 ${
+    isPre
+      ? 'bg-red-700 text-white border-amber-400 shadow'
+      : 'bg-slate-950 text-slate-400 border-slate-800 hover:text-slate-200'
+  }`;
+  postBtn.className = `py-2.5 px-3 rounded-xl text-xs sm:text-sm font-black border transition flex items-center justify-center gap-1.5 ${
+    !isPre
+      ? 'bg-amber-500 text-slate-950 border-amber-300 shadow'
+      : 'bg-slate-950 text-slate-400 border-slate-800 hover:text-slate-200'
+  }`;
+
+  // スコア欄とセクション3見出しの切替
+  const scoreBox = document.getElementById('score-box');
+  const sec3Title = document.getElementById('section3-title');
+  const pollLabel = document.getElementById('poll-label');
+  if (isPre) {
+    scoreBox.classList.add('hidden');
+    sec3Title.textContent = '3. 試合前アンケート4択';
+    pollLabel.textContent = 'Xアンケート4択（勝敗予想・注目選手・注目ポイント）';
+  } else {
+    scoreBox.classList.remove('hidden');
+    sec3Title.textContent = '3. スコア＆MOMアンケート候補';
+    pollLabel.textContent = 'Xアンケート4択（今日のMOM・印象に残った選手）';
+  }
+
   // 大会ボタンハイライト
   document.querySelectorAll('.comp-btn').forEach(btn => {
     const active = state.competition.includes(btn.dataset.comp);
@@ -642,9 +736,10 @@ function renderUI() {
 
 function saveCurrentPreset() {
   onStateChange();
+  const modeText = state.timingMode === 'pre' ? '試合前' : '試合後';
   const opp = (state.opponent || '対戦相手未設定').trim();
   const dt = formatJapaneseDateTime(state.matchDate, state.matchTime);
-  const label = `${dt ? dt + ' ' : ''}vs ${opp}`;
+  const label = `【${modeText}】${dt ? dt + ' ' : ''}vs ${opp}`;
   const now = new Date();
   const savedAt = `${now.getMonth() + 1}/${now.getDate()} ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
 
@@ -653,6 +748,7 @@ function saveCurrentPreset() {
     label,
     savedAt,
     data: {
+      timingMode: state.timingMode,
       competition: state.competition,
       venue: state.venue,
       opponent: state.opponent,
@@ -715,6 +811,7 @@ function renderSavedPresets() {
 }
 
 function resetForm() {
+  state.timingMode = 'pre';
   state.competition = '明治安田J1リーグ';
   state.venue = 'HOME';
   state.opponent = '';
@@ -722,7 +819,7 @@ function resetForm() {
   state.matchTime = '14:00';
   state.scoreKashima = '';
   state.scoreOpponent = '';
-  state.pollOpts = ['鈴木優磨', 'レオ・セアラ', '早川友基', 'チーム全員（リプ欄へ！）'];
+  state.pollOpts = ['鹿島の勝利！', '完封（クリーンシート）勝利', '複数得点で快勝', '接戦をモノにする！'];
   state.messageLine2 = '';
   syncDOMFromState();
   saveAutoData();
